@@ -159,23 +159,15 @@ class AuthenticationSystem:
         return self.authenticate_user(username, password)
     
     def authenticate_user(self, username, password):
-        """
-        Autentica un usuario verificando sus credenciales con Argon2
-        
-        Args:
-            username: Nombre de usuario
-            password: Contraseña en texto plano
-            
-        Returns:
-            tuple: (bool, str) - (éxito, mensaje)
-        """
-        # Recargar usuarios del archivo (por si hubo cambios externos)
+        """Autentifica un usuario verificando sus credenciales con Argon2"""
+
+        # Cargar el json de usuarios
         self.users_db = load_json(self.users_file)
         
-        # Verificar si el usuario existe
+        # Verificar si el usuario ya existe
         if username not in self.users_db:
-            print(f"❌ Usuario '{username}' no existe")
-            return False, "Usuario no existe"
+            print(f"Usuario '{username}' no existe")
+            return False
         
         # Obtener el hash almacenado
         stored_hash = self.users_db[username]['hash']
@@ -184,64 +176,44 @@ class AuthenticationSystem:
         try:
             self.ph.verify(stored_hash, password)
             
-            # Si necesita rehashing (parámetros actualizados), lo hace automáticamente
-            if self.ph.check_needs_rehash(stored_hash):
-                print("ℹ️  Actualizando hash con nuevos parámetros...")
-                self.users_db[username]['hash'] = self.ph.hash(password)
-            
             # Actualizar último login
             self.users_db[username]['last_login'] = datetime.now().isoformat()
             save_json(self.users_file, self.users_db)
             
-            print(f"\n✅ Autenticación correcta")
-            print(f"   - Usuario: {username}")
-            print(f"   - Algoritmo: Argon2id verification")
-            print(f"   - Timestamp: {self.users_db[username]['last_login']}")
+            print(f"Autenticación correcta\n")
+            print(f"   - Usuario: {username}\n")
             
-            return True, "Autenticación correcta"
-            
-        except VerifyMismatchError:
-            print(f"❌ Contraseña incorrecta para usuario '{username}'")
-            return False, "Contraseña incorrecta"
+            return True
         
+        # Si la verificación falla, se lanza VerifyMismatchError (exception de la biblioteca de argon)
+        except VerifyMismatchError:
+            print(f"Contraseña incorrecta para usuario '{username}'")
+            return False
+        
+        # Si hay otro error en la verificación, se lanza VerificationError o InvalidHash
         except (VerificationError, InvalidHash) as e:
-            print(f"❌ Error en verificación: {e}")
-            return False, "Error en la autenticación"
+            print(f"Error en verificación: {e}")
+            return False
+        
+
+        # ============================================================================
+        # Maybe las quito en el futuro
+        # ============================================================================
     
     def user_exists(self, username):
-        """
-        Verifica si un usuario existe en el sistema
-        
-        Args:
-            username: Nombre de usuario a verificar
-            
-        Returns:
-            bool: True si el usuario existe
-        """
-        # Recargar usuarios por si acaso
+        """Verifica si un usuario existe en el sistema"""
+
+        # Cargamos el json de usuarios, y devuelve el usuario si es que existe
         self.users_db = load_json(self.users_file)
         return username in self.users_db
     
     def get_all_users(self):
-        """
-        Obtiene la lista de todos los usuarios registrados
-        
-        Returns:
-            list: Lista de nombres de usuario
-        """
+        """Obtiene la lista de todos los usuarios registrados"""
         self.users_db = load_json(self.users_file)
         return list(self.users_db.keys())
     
     def get_user_info(self, username):
-        """
-        Obtiene información básica de un usuario (sin el hash)
-        
-        Args:
-            username: Nombre de usuario
-            
-        Returns:
-            dict: Información del usuario o None
-        """
+        """Obtiene información básica de un usuario (sin el hash)"""
         self.users_db = load_json(self.users_file)
         
         if username not in self.users_db:
