@@ -154,17 +154,8 @@ class AuthenticationSystem:
         return True
     
     def login(self, username, password):
-        """
-        Autentica un usuario verificando sus credenciales
-        (Alias de authenticate_user)
-        
-        Args:
-            username: Nombre de usuario
-            password: Contraseña en texto plano
-            
-        Returns:
-            tuple: (bool, str) - (éxito, mensaje)
-        """
+        """Inicia sesión de un usuario asegurándose de que la información introducida es correcta"""
+
         return self.authenticate_user(username, password)
     
     def authenticate_user(self, username, password):
