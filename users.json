@@ -1,1 +1,20 @@
-{}
+{
+  "Juan": {
+    "hash": "$argon2id$v=19$m=65536,t=3,p=4$c++9/NfwrL69y7FJS4yH0Q$+4ryFDJR7un9Ui1VT84DKxEw5y0K8uWG+28cDyG0x9A",
+    "email": null,
+    "created_at": "2025-10-10T14:35:59.929768",
+    "last_login": "2025-10-10T14:39:37.936022"
+  },
+  "Paco": {
+    "hash": "$argon2id$v=19$m=65536,t=3,p=4$V7HAbmbFCZoVKBRD8BZ0tA$Shiolcj9PLvYVLvDpcQ4qUcdwJmUbJbHsPDWngenhEs",
+    "email": null,
+    "created_at": "2025-10-10T14:38:31.951953",
+    "last_login": "2025-10-10T14:38:52.011498"
+  },
+  "Maria": {
+    "hash": "$argon2id$v=19$m=65536,t=3,p=4$m+NP20XEIUW6IRK0s/C16A$CbIKUyDJboo0a6DZhywEvrl9f4aBXkf/xRRpyhflepo",
+    "email": null,
+    "created_at": "2025-10-10T14:42:55.975556",
+    "last_login": "2025-10-10T14:43:06.284271"
+  }
+}

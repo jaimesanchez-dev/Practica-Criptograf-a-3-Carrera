@@ -1,3 +1,10 @@
 {
-  "messages": []
+  "messages": [
+    {
+      "sender": "Paco",
+      "recipient": "Juan",
+      "timestamp": "2025-10-10T14:39:20.479440",
+      "ciphertext": "gAAAAABo6P54fEsfAOSR6IfRp3jBn78g0Utgl2EhgXhgYYB3DnNtnKqIfI6sHi7WdKwEGcIItk6FWglZ07fL422BhexITfAc8w=="
+    }
+  ]
 }
