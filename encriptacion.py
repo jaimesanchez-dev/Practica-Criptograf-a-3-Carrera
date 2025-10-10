@@ -54,9 +54,9 @@ class CifradoSimetrico:
         self.keys_db = load_json(self.keys_file)
         self.messages_db = load_json(self.messages_file)
 
-        if sender not in self.keys_db or recipient not in self.keys_db:
-            print("Remitente o destinatario sin clave Fernet generada.")
-            return False
+        # Si el que envía el mensaje no tiene una clave de cifrado asignada, se le genera una
+        if sender not in self.keys_db:
+            self.generar_clave(sender)
 
         # Sacamos la clave del usuario y la transformamos de string a bytes
         key = self.keys_db[sender]["fernet_key"].encode()
@@ -86,11 +86,6 @@ class CifradoSimetrico:
         """Función que desencripta un mensaje"""
         self.keys_db = load_json(self.keys_file)
         self.messages_db = load_json(self.messages_file)
-
-        # Si el usuario no tiene clave, devolvemos False
-        if username not in self.keys_db:
-            print(f"El usuario '{username}' no tiene clave Fernet.")
-            return False
         
         # Buscamos cuál de todos los mensajes tiene como receptor al usuario en cuestión
         inbox = [m for m in self.messages_db["messages"] if m["recipient"] == username]

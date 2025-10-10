@@ -12,10 +12,9 @@ def menu_principal():
 
 def menu_usuario(username):
     print(f"\n=== Menú del usuario: {username} ===")
-    print("1. Generar mi clave Fernet")
-    print("2. Enviar mensaje cifrado")
-    print("3. Leer mis mensajes recibidos")
-    print("4. Cerrar sesión")
+    print("1. Enviar mensaje cifrado")
+    print("2. Leer mis mensajes recibidos")
+    print("3. Cerrar sesión")
 
 def main():
     auth = AuthenticationSystem()
@@ -60,12 +59,8 @@ def menu_sesion(auth, crypto, username):
         menu_usuario(username)
         opcion = input("Selecciona una opción: ").strip()
 
-        # Generar clave Fernet
-        if opcion == "1":
-            crypto.generar_clave(username)
-
         # Enviar mensaje
-        elif opcion == "2":
+        if opcion == "1":
             recipient = input("Destinatario: ").strip()
             mensaje = input("Mensaje: ").strip()
 
@@ -75,11 +70,11 @@ def menu_sesion(auth, crypto, username):
                 crypto.encriptar_mensaje(username, recipient, mensaje)
 
         # Leer mensajes recibidos
-        elif opcion == "3":
+        elif opcion == "2":
             crypto.desencriptar_mensaje(username)
 
         # Cerrar sesión
-        elif opcion == "4":
+        elif opcion == "3":
             print(f"👋 Sesión cerrada para {username}.\n")
             break
 
