@@ -14,8 +14,13 @@ def save_json(path, obj):
     with open(path, "w", encoding="utf-8") as f:
         json.dump(obj, f, indent=2)
 
-def initialize_files(users_file="users.json", messages_file="messages.json", keys_file="keys.json"):
+def initialize_files(users_file=r"jsons\users.json", messages_file=r"jsons\messages.json", keys_file=r"jsons\keys.json"):
     """Función que inicializa los archivos json si no existen"""
+
+    # Crear carpeta json si no existe
+    if not os.path.exists("jsons"):
+        os.mkdir("jsons")
+
     # Crea archivo de usuarios si no existe
     if not os.path.exists(users_file):
         save_json(users_file, {})

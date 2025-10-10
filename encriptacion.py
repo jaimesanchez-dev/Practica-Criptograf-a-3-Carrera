@@ -4,9 +4,9 @@ from datetime import datetime
 import os
 from funciones_json import load_json, save_json, initialize_files
 
-USERS_FILE = "users.json"
-MESSAGES_FILE = "messages.json"
-KEYS_FILE = "keys.json"
+USERS_FILE = r"jsons\users.json"
+MESSAGES_FILE = r"jsons\messages.json"
+KEYS_FILE = r"jsons\keys.json"
 
 class CifradoSimetrico:
     """Gestiona el cifrado y descifrado de mensajes usando Fernet"""

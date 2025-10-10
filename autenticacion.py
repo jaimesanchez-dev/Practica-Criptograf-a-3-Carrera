@@ -5,7 +5,7 @@ from datetime import datetime
 import os
 from funciones_json import load_json, save_json, initialize_files
 
-USERS_FILE = "users.json"
+USERS_FILE = r"jsons\users.json"
 
 class AuthenticationSystem:
     """Gestiona el registro y autenticación de usuarios"""
