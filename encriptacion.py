@@ -24,57 +24,57 @@ class CifradoSimetrico:
         self.messages_db = load_json(self.messages_file)
         self.keys_db = load_json(self.keys_file)
 
-    def generar_clave(self, username):
+    def generar_clave(self, usuario):
         """Genera y guarda una clave Fernet para un usuario en keys.json"""
         # Cargamos los archivos json que vamos a usar
         self.users_db = load_json(self.users_file)
         self.keys_db = load_json(self.keys_file)
 
         # Si el usuario no existe, devolvemos False (no podemos generar clave)
-        if username not in self.users_db:
-            print(f"Usuario '{username}' no existe.")
+        if usuario not in self.users_db:
+            print(f"Usuario '{usuario}' no existe.")
             return False
 
         # En otro caso, la generamos y aplicamos .decode para poder almacenarla en el json
         # (Con el .decode la transformamos de bytes a string para poder guardarla en el json)
         key = Fernet.generate_key().decode()
-        self.keys_db[username] = {
+        self.keys_db[usuario] = {
             "fernet_key": key,
-            "created_at": datetime.now().isoformat()
+            "fecha_creacion": datetime.now().isoformat()
         }
 
         # Guardamos los nuevos datos en nuestro fichero
         save_json(self.keys_file, self.keys_db)
-        print(f"Clave Fernet generada y almacenada en '{self.keys_file}' para usuario '{username}'.\n")
+        print(f"Clave Fernet generada y almacenada en '{self.keys_file}' para usuario '{usuario}'.\n")
         return True
     
-    def encriptar_mensaje(self, sender, recipient, plaintext):
+    def encriptar_mensaje(self, emisor, receptor, texto):
         """Función que encripa un mensaje"""
         # Cargamos los ficheros que vamos a utilizar
         self.keys_db = load_json(self.keys_file)
         self.messages_db = load_json(self.messages_file)
 
         # Si el que envía el mensaje no tiene una clave de cifrado asignada, se le genera una
-        if sender not in self.keys_db:
-            self.generar_clave(sender)
+        if emisor not in self.keys_db:
+            self.generar_clave(emisor)
 
         # Sacamos la clave del usuario y la transformamos de string a bytes
-        key = self.keys_db[sender]["fernet_key"].encode()
+        key = self.keys_db[emisor]["fernet_key"].encode()
         # Creamos el cifrador fernet a través de la clave del usuario
         fernet = Fernet(key)
         # Ciframos el texto con .encrypt y usamos .encode en el mensaje para pasarlo a bytes
-        ciphertext = fernet.encrypt(plaintext.encode())
+        texto_cifrado = fernet.encrypt(texto.encode())
 
         # Guardamos los datos del mensaje
-        msg = {
-            "sender": sender,
-            "recipient": recipient,
-            "timestamp": datetime.now().isoformat(),
-            "ciphertext": ciphertext.decode()
+        mensaje = {
+            "emisor": emisor,
+            "receptor": receptor,
+            "fecha_envio": datetime.now().isoformat(),
+            "texto_cifrado": texto_cifrado.decode()
         }
 
         # Guardamos el mensaje en la base de datos
-        self.messages_db["messages"].append(msg)
+        self.messages_db["mensajes"].append(mensaje)
 
         # Guardamos el json
         save_json(self.messages_file, self.messages_db)
@@ -82,13 +82,13 @@ class CifradoSimetrico:
         print(f"Mensaje cifrado y guardado correctamente.")
         return True
     
-    def desencriptar_mensaje(self, username):
+    def desencriptar_mensaje(self, usuario):
         """Función que desencripta un mensaje"""
         self.keys_db = load_json(self.keys_file)
         self.messages_db = load_json(self.messages_file)
         
         # Buscamos cuál de todos los mensajes tiene como receptor al usuario en cuestión
-        inbox = [m for m in self.messages_db["messages"] if m["recipient"] == username]
+        inbox = [m for m in self.messages_db["mensajes"] if m["receptor"] == usuario]
 
         # Si no hay mensajes devolvemos False
         if not inbox:
@@ -96,18 +96,18 @@ class CifradoSimetrico:
             return False
         
         #Empezamos a sacar todos los mensajes que el usuario ha recibido
-        print(f"--- Bandeja de entrada de {username} ---\n")
+        print(f"--- Bandeja de entrada de {usuario} ---\n")
         for mensaje in inbox:
             # Pasamos la clave guardada en el json a bytes
-            key = self.keys_db[mensaje["sender"]]["fernet_key"].encode()
+            key = self.keys_db[mensaje["emisor"]]["fernet_key"].encode()
             # Creamos el cifrador fernet a partir de la clave
             fernet = Fernet(key)
             try:
                 # Desencriptamos el mensaje pasándolos primero a bytes con .encode y el resultado final 
                 # lo ponemos en forma de string con .decode
-                plaintext = fernet.decrypt(mensaje["ciphertext"].encode()).decode()
-                print(f"De: {mensaje['sender']} | Fecha: {mensaje['timestamp']}\n")
-                print(f"Mensaje descifrado: {plaintext}")
+                texto = fernet.decrypt(mensaje["texto_cifrado"].encode()).decode()
+                print(f"De: {mensaje['emisor']} | Fecha: {mensaje['fecha_envio']}\n")
+                print(f"Mensaje descifrado: {texto}")
             except Exception as e:
                 print(f"[ERROR] No se pudo descifrar el mensaje: {e}")
         

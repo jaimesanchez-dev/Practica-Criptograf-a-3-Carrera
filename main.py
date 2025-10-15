@@ -1,9 +1,9 @@
-from autenticacion import AuthenticationSystem
+from autenticacion import SistemaAutenticacion
 from encriptacion import CifradoSimetrico
 
 def menu_principal():
     print("====================================")
-    print("   🔐 Sistema de Mensajería Segura  ")
+    print("   Sistema de Mensajería Segura  ")
     print("====================================\n")
 
     print("1. Registrar nuevo usuario")
@@ -17,8 +17,8 @@ def menu_usuario(username):
     print("3. Cerrar sesión")
 
 def main():
-    auth = AuthenticationSystem()
-    crypto = CifradoSimetrico()
+    autenticacion = SistemaAutenticacion()
+    cripto = CifradoSimetrico()
 
     while True:
         menu_principal()
@@ -26,56 +26,56 @@ def main():
 
         # Registro
         if opcion == "1":
-            username = input("Nombre de usuario: ").strip()
-            password = input("Contraseña: ").strip()
+            usuario = input("Nombre de usuario: ").strip()
+            contraseña = input("Contraseña: ").strip()
             email = input("Email (opcional): ").strip() or None
 
-            if auth.register_user(username, password, email):
-                print("✅ Usuario registrado correctamente.")
+            if autenticacion.registrar_usuario(usuario, contraseña, email):
+                print("Usuario registrado correctamente.")
             else:
-                print("❌ No se pudo registrar el usuario.")
+                print("No se pudo registrar el usuario.")
 
         # Login
         elif opcion == "2":
-            username = input("Usuario: ").strip()
-            password = input("Contraseña: ").strip()
+            usuario = input("Usuario: ").strip()
+            contraseña = input("Contraseña: ").strip()
 
-            if auth.login(username, password):
-                print(f"\n👋 Bienvenido, {username}!")
-                menu_sesion(auth, crypto, username)
+            if autenticacion.login(usuario, contraseña):
+                print(f"\nBienvenido, {usuario}!")
+                menu_sesion(autenticacion, cripto, usuario)
             else:
-                print("❌ Error de autenticación. Revisa tus credenciales.")
+                print("Error de autenticación. Revisa tus credenciales.")
 
         # Salida
         elif opcion == "3":
-            print("👋 Saliendo del programa...")
+            print("Saliendo del programa...")
             break
 
         else:
             print("Opción no válida. Intenta de nuevo.\n")
 
-def menu_sesion(auth, crypto, username):
+def menu_sesion(autenticacion, cripto, usuario):
     while True:
-        menu_usuario(username)
+        menu_usuario(usuario)
         opcion = input("Selecciona una opción: ").strip()
 
         # Enviar mensaje
         if opcion == "1":
-            recipient = input("Destinatario: ").strip()
+            receptor = input("Destinatario: ").strip()
             mensaje = input("Mensaje: ").strip()
 
-            if not auth.user_exists(recipient):
-                print(f"❌ El usuario '{recipient}' no existe.")
+            if not autenticacion.existe_usuario(receptor):
+                print(f"El usuario '{receptor}' no existe.")
             else:
-                crypto.encriptar_mensaje(username, recipient, mensaje)
+                cripto.encriptar_mensaje(usuario, receptor, mensaje)
 
         # Leer mensajes recibidos
         elif opcion == "2":
-            crypto.desencriptar_mensaje(username)
+            cripto.desencriptar_mensaje(usuario)
 
         # Cerrar sesión
         elif opcion == "3":
-            print(f"👋 Sesión cerrada para {username}.\n")
+            print(f"Sesión cerrada para {usuario}.\n")
             break
 
         else:
