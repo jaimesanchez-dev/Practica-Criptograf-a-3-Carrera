@@ -104,7 +104,7 @@ class SistemaAutenticacion:
         
         # Hacer hash a la contraseña usando Argon2
         try:
-            contraseña_hash = self.ph.hash(contraseña)
+            contraseña_hash = self.ph.hash(usuario + contraseña)
         except Exception as e:
             print(f"Error al hacer hash a la contraseña: {e}")
             return False
@@ -146,7 +146,7 @@ class SistemaAutenticacion:
         
         # Verificar la contraseña con Argon2
         try:
-            self.ph.verify(hash_almacenado, contraseña)
+            self.ph.verify(hash_almacenado, usuario + contraseña) 
             
             # Actualizar último login
             self.users_db[usuario]['ultimo_login'] = datetime.now().isoformat()
