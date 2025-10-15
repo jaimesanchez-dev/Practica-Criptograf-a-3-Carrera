@@ -1,14 +1,20 @@
 import os
-from funciones_json import load_json, save_json, initialize_files
 
-# Crea archivo de claves si no existe
+
 def initialize_folder(usuario):
-    if not os.path.exists("json/{usuario}"):
-        os.mkdir("jsons/{usuario}")
+    folder = f"jsons\\{usuario}"
+    if not os.path.exists(folder):
+        os.makedirs(folder)
+        print(f"Carpeta '{folder}' creada")
 
-        save_json("json/{usuario}/claveprivada.json", {})
-        print(f"Archivo 'json/{usuario}/claveprivada.json' creado")
+def save_clave_privada(usuario, clave_pem):
+    path = f"jsons\\{usuario}\\claveprivada.pem"
+    with open(path, "w", encoding="utf-8") as f:
+        f.write(clave_pem)
+    print(f"Clave privada guardada en '{path}'")
 
-        save_json("json/{usuario}/clavepublica.json", {})
-        print(f"Archivo 'json/{usuario}/clavepublica.json' creado")
-    
+def save_clave_publica(usuario, clave_pem):
+    path = f"jsons\\{usuario}\\clavepublica.pem"
+    with open(path, "w", encoding="utf-8") as f:
+        f.write(clave_pem)
+    print(f"Clave pública guardada en '{path}'")

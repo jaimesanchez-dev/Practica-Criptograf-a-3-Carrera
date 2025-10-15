@@ -4,6 +4,7 @@ import re
 from datetime import datetime
 import os
 from funciones_json import load_json, save_json, initialize_files
+from crear_usuarios import initialize_folder
 
 USERS_FILE = r"jsons\users.json"
 
@@ -119,6 +120,10 @@ class SistemaAutenticacion:
         
         # Guardar el json con el nuevo usuario
         save_json(self.users_file, self.users_db)
+
+        #Crear carpeta y archivos del usuario
+
+        initialize_folder(usuario)
         
         print("Usuario registrado correctamente\n")
         print(f"   - Usuario: {usuario}\n")
