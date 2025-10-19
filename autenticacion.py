@@ -2,9 +2,9 @@ from argon2 import PasswordHasher
 from argon2.exceptions import VerifyMismatchError, VerificationError, InvalidHash
 import re
 from datetime import datetime
-import os
 from funciones_json import load_json, save_json, initialize_files
 from crear_usuarios import initialize_folder
+from encriptado_asimetrico import CifradoAsimetrico
 
 USERS_FILE = r"jsons\users.json"
 
@@ -23,6 +23,7 @@ class SistemaAutenticacion:
         self.users_db = load_json(self.users_file)
         
         print("Sistema de Autenticación inicializado\n")
+    
     
     def _validar_usuario(self, usuario):
         """Valida el formato del nombre de usuario"""
@@ -50,6 +51,7 @@ class SistemaAutenticacion:
         # En los demás casos devuelve True
         return True
     
+
     def _validar_contraseña(self, contraseña):
         """Valida que el usuario tenga una contraseña segura"""
 
@@ -85,6 +87,7 @@ class SistemaAutenticacion:
         
         return True
     
+
     def registrar_usuario(self, usuario, contraseña, email=None):
         """Registra un nuevo usuario en el sistema"""
 
@@ -124,17 +127,23 @@ class SistemaAutenticacion:
         #Crear carpeta y archivos del usuario
 
         initialize_folder(usuario)
+
+        # Generar claves
+        cripto = CifradoAsimetrico
+        cripto.generar_claves(usuario)
         
         print("Usuario registrado correctamente\n")
         print(f"   - Usuario: {usuario}\n")
         
         return True
     
+
     def login(self, usuario, contraseña):
         """Inicia sesión de un usuario asegurándose de que la información introducida es correcta"""
 
         return self.autenticar_usuario(usuario, contraseña)
     
+
     def autenticar_usuario(self, usuario, contraseña):
         """Autentifica un usuario verificando sus credenciales con Argon2"""
 
@@ -171,6 +180,7 @@ class SistemaAutenticacion:
         except (VerificationError, InvalidHash) as e:
             print(f"Error en verificación: {e}")
             return False
+
 
     def existe_usuario(self, usuario):
         """Verifica si un usuario existe en el sistema"""

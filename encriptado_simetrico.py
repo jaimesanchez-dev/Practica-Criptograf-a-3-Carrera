@@ -8,7 +8,7 @@ USERS_FILE = r"jsons\users.json"
 MESSAGES_FILE = r"jsons\messages.json"
 KEYS_FILE = r"jsons\keys.json"
 
-class Cifrado:
+class CifradoSimetrico:
     """Gestiona el cifrado y descifrado de mensajes usando Fernet"""
 
     def __init__(self, users_file=USERS_FILE, messages_file=MESSAGES_FILE, keys_file=KEYS_FILE):

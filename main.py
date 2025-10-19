@@ -1,5 +1,5 @@
 from autenticacion import SistemaAutenticacion
-from encriptacion import CifradoSimetrico
+from encriptado_asimetrico import CifradoAsimetrico
 
 def menu_principal():
     print("====================================")
@@ -18,7 +18,7 @@ def menu_usuario(username):
 
 def main():
     autenticacion = SistemaAutenticacion()
-    cripto = CifradoSimetrico()
+    cripto = CifradoAsimetrico()
 
     while True:
         menu_principal()
@@ -67,11 +67,11 @@ def menu_sesion(autenticacion, cripto, usuario):
             if not autenticacion.existe_usuario(receptor):
                 print(f"El usuario '{receptor}' no existe.")
             else:
-                cripto.encriptar_mensaje(usuario, receptor, mensaje)
+                cripto.encriptado_asimetrico(usuario, receptor, mensaje)
 
         # Leer mensajes recibidos
         elif opcion == "2":
-            cripto.desencriptar_mensaje(usuario)
+            cripto.desencriptado_asimetrico(usuario)
 
         # Cerrar sesión
         elif opcion == "3":

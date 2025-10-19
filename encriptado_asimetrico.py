@@ -15,7 +15,7 @@ MESSAGES_FILE = r"jsons\messages.json"
 KEYS_FILE = r"jsons\keys.json"
 
 class CifradoAsimetrico:
-    """aaaaaaaaaaaaaaaaa"""
+    """Clase que se encarga del cifrado asimétrico de mensajes"""
 
     def __init__(self, users_file=USERS_FILE, messages_file=MESSAGES_FILE, keys_file=KEYS_FILE):
         """Inicializamos el sistema de cifrado"""
