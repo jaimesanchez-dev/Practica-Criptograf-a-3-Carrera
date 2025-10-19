@@ -1,5 +1,5 @@
 import os
-
+from cryptography.hazmat.primitives import serialization
 
 def initialize_folder(usuario):
     folder = f"jsons\\{usuario}"
@@ -18,3 +18,21 @@ def save_clave_publica(usuario, clave_pem):
     with open(path, "w", encoding="utf-8") as f:
         f.write(clave_pem)
     print(f"Clave pública guardada en '{path}'")
+
+def cargar_clave_privada(usuario):
+    """Lee y devuelve la clave privada del usuario desde su archivo .pem"""
+
+    path = f"jsons\\{usuario}\\claveprivada.pem"
+    with open(path, "rb") as f:
+        private_key = serialization.load_pem_private_key(f.read())
+
+    return private_key
+
+def cargar_clave_publica(usuario):
+    """Lee y devuelve la clave pública del usuario desde su archivo .pem"""
+
+    path = f"jsons\\{usuario}\\clavepublica.pem"
+    with open(path, "rb") as f:
+        public_key = serialization.load_pem_public_key(f.read())
+
+    return public_key
