@@ -8,7 +8,7 @@ USERS_FILE = r"jsons\users.json"
 MESSAGES_FILE = r"jsons\messages.json"
 KEYS_FILE = r"jsons\keys.json"
 
-class CifradoSimetrico:
+class Cifrado:
     """Gestiona el cifrado y descifrado de mensajes usando Fernet"""
 
     def __init__(self, users_file=USERS_FILE, messages_file=MESSAGES_FILE, keys_file=KEYS_FILE):
@@ -24,7 +24,7 @@ class CifradoSimetrico:
         self.messages_db = load_json(self.messages_file)
         self.keys_db = load_json(self.keys_file)
 
-    def generar_clave(self, usuario):
+    def generar_clave_simetrica(self, usuario):
         """Genera y guarda una clave Fernet para un usuario en keys.json"""
         # Cargamos los archivos json que vamos a usar
         self.users_db = load_json(self.users_file)
@@ -48,7 +48,7 @@ class CifradoSimetrico:
         print(f"Clave Fernet generada y almacenada en '{self.keys_file}' para usuario '{usuario}'.\n")
         return True
     
-    def encriptar_mensaje(self, emisor, receptor, texto):
+    def encriptado_simetrico(self, emisor, receptor, texto):
         """Función que encripa un mensaje"""
         # Cargamos los ficheros que vamos a utilizar
         self.keys_db = load_json(self.keys_file)
@@ -82,7 +82,7 @@ class CifradoSimetrico:
         print(f"Mensaje cifrado y guardado correctamente.")
         return True
     
-    def desencriptar_mensaje(self, usuario):
+    def desencriptado_simetrico(self, usuario):
         """Función que desencripta un mensaje"""
         self.keys_db = load_json(self.keys_file)
         self.messages_db = load_json(self.messages_file)
