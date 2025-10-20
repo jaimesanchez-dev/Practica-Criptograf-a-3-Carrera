@@ -45,8 +45,19 @@ class CifradoAsimetrico:
         public_key = private_key.public_key()
 
         # Guardamos las claves privada en la carpeta del usuario
-        save_clave_privada(usuario, private_key)
-        save_clave_publica(usuario, public_key)
+        private_pem = private_key.private_bytes(
+            encoding=serialization.Encoding.PEM,
+            format=serialization.PrivateFormat.PKCS8,
+            encryption_algorithm=serialization.NoEncryption()
+        ).decode()
+
+        public_pem = public_key.public_bytes(
+            encoding=serialization.Encoding.PEM,
+            format=serialization.PublicFormat.SubjectPublicKeyInfo
+        ).decode()
+
+        save_clave_privada(usuario, private_pem)
+        save_clave_publica(usuario, public_pem)
 
 
     def encriptado_asimetrico(self, emisor, receptor, texto):

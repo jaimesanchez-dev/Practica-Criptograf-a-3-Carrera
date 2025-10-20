@@ -33,7 +33,7 @@ def cargar_clave_privada(usuario):
 
     path = f"jsons\\{usuario}\\claveprivada.pem"
     with open(path, "rb") as f:
-        private_key = serialization.load_pem_private_key(f.read())
+        private_key = serialization.load_pem_private_key(f.read(), password=None)
 
     return private_key
 

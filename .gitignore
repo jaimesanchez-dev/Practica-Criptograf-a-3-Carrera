@@ -1,6 +1,7 @@
 keys.json
 messages.json
 users.json
+jsons/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

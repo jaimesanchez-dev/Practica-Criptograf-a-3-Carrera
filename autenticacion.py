@@ -129,7 +129,7 @@ class SistemaAutenticacion:
         initialize_folder(usuario)
 
         # Generar claves
-        cripto = CifradoAsimetrico
+        cripto = CifradoAsimetrico()
         cripto.generar_claves(usuario)
         
         print("Usuario registrado correctamente\n")
