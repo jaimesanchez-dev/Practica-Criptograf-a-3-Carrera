@@ -60,23 +60,18 @@ class CifradoHibrido:
 
 
     def encriptado_hibrido(self, emisor, receptor, texto):
-        """
-        Función que encripta un mensaje usando cifrado híbrido:
-        1. Genera una clave simétrica aleatoria
-        2. Cifra el mensaje con la clave simétrica (Fernet)
-        3. Cifra la clave simétrica con la clave pública del receptor (RSA)
-        """
+        """Función que encripta un mensaje usando cifrado híbrido"""
         # Cargamos los mensajes
         self.messages_db = load_json(self.messages_file)
 
-        # PASO 1: Generar clave simétrica temporal para este mensaje
+        # Generamos clave simétrica temporal para este mensaje
         clave_simetrica = Fernet.generate_key()
         fernet = Fernet(clave_simetrica)
 
-        # PASO 2: Cifrar el mensaje con la clave simétrica
+        # Ciframos el mensaje con la clave simétrica
         texto_cifrado = fernet.encrypt(texto.encode())
 
-        # PASO 3: Cifrar la clave simétrica con la clave pública del receptor
+        # Ciframos la clave simétrica con la clave pública del receptor
         public_key = cargar_clave_publica(receptor)
         clave_simetrica_cifrada = public_key.encrypt(
             clave_simetrica,
@@ -87,13 +82,13 @@ class CifradoHibrido:
             )
         )
 
-        # PASO 4: Guardar el mensaje con ambos componentes
+        # Guardamos el mensaje con ambos componentes
         mensaje = {
             "emisor": emisor,
             "receptor": receptor,
             "fecha_envio": datetime.now().isoformat(),
-            "clave_cifrada": clave_simetrica_cifrada.hex(),  # Clave simétrica cifrada con RSA
-            "texto_cifrado": texto_cifrado.decode()           # Mensaje cifrado con Fernet
+            "clave_cifrada": clave_simetrica_cifrada.hex(),
+            "texto_cifrado": texto_cifrado.decode()
         }
 
         self.messages_db["mensajes"].append(mensaje)
@@ -104,27 +99,23 @@ class CifradoHibrido:
     
 
     def desencriptado_hibrido(self, usuario):
-        """
-        Desencripta los mensajes usando cifrado híbrido:
-        1. Descifra la clave simétrica con la clave privada del usuario (RSA)
-        2. Descifra el mensaje con la clave simétrica (Fernet)
-        """
+        """Desencripta los mensajes usando cifrado híbrido"""
         self.messages_db = load_json(self.messages_file)
 
-        # Buscar los mensajes que le enviaron al usuario
+        # Buscamos los mensajes que le enviaron al usuario
         inbox = [m for m in self.messages_db["mensajes"] if m["receptor"] == usuario]
 
         if not inbox:
             print(f"No hay mensajes para {usuario}.\n")
             return False
 
-        # Cargar la clave privada del usuario
+        # Cargamos la clave privada del usuario
         private_key = cargar_clave_privada(usuario)
 
         print(f"--- Bandeja de entrada de {usuario} ---\n")
         for mensaje in inbox:
             try:
-                # PASO 1: Descifrar la clave simétrica con la clave privada (RSA)
+                # Desciframos la clave simétrica con la clave privada
                 clave_cifrada_bytes = bytes.fromhex(mensaje["clave_cifrada"])
                 clave_simetrica = private_key.decrypt(
                     clave_cifrada_bytes,
@@ -135,7 +126,7 @@ class CifradoHibrido:
                     )
                 )
 
-                # PASO 2: Descifrar el mensaje con la clave simétrica (Fernet)
+                # Desciframos el mensaje con la clave simétrica
                 fernet = Fernet(clave_simetrica)
                 texto_plano = fernet.decrypt(mensaje["texto_cifrado"].encode()).decode()
 

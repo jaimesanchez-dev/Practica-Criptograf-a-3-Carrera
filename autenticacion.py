@@ -15,7 +15,7 @@ class SistemaAutenticacion:
         """Inicializa el sistema de autenticación con Argon2"""
         self.users_file = users_file
         
-        # Inicializar archivos si no existen
+        # Inicializamos archivos si no existen
         initialize_files()
 
         self.ph = PasswordHasher()
@@ -88,47 +88,46 @@ class SistemaAutenticacion:
         return True
     
 
-    def registrar_usuario(self, usuario, contraseña, email=None):
+    def registrar_usuario(self, usuario, contraseña):
         """Registra un nuevo usuario en el sistema"""
 
-        # Validar nombre de usuario
+        # Validamos nombre de usuario
         valido = self._validar_usuario(usuario)
         if not valido:
             return False
         
-        # Verificar si el usuario ya existe
+        # Verificamos si el usuario ya existe
         if usuario in self.users_db:
             print(f"Usuario '{usuario}' ya existe")
             return False
         
-        # Validar seguridad de la contraseña
+        # Validamos seguridad de la contraseña
         valido = self._validar_contraseña(contraseña)
         if not valido:
             return False
         
-        # Hacer hash a la contraseña usando Argon2
+        # Hacemos hash a la contraseña usando Argon2
         try:
             contraseña_hash = self.ph.hash(usuario + contraseña)
         except Exception as e:
             print(f"Error al hacer hash a la contraseña: {e}")
             return False
         
-        # Crear registro de usuario
+        # Creamos registro de usuario
         self.users_db[usuario] = {
             'hash': contraseña_hash,
-            'email': email,
             'fecha_creacion': datetime.now().isoformat(),
             'ultimo_login': None
         }
         
-        # Guardar el json con el nuevo usuario
+        # Guardamos el json con el nuevo usuario
         save_json(self.users_file, self.users_db)
 
-        #Crear carpeta y archivos del usuario
+        #Creamos carpeta y archivos del usuario
 
         initialize_folder(usuario)
 
-        # Generar claves
+        # Generamos claves
         cripto = CifradoHibrido()
         cripto.generar_claves(usuario)
         
@@ -147,22 +146,22 @@ class SistemaAutenticacion:
     def autenticar_usuario(self, usuario, contraseña):
         """Autentifica un usuario verificando sus credenciales con Argon2"""
 
-        # Cargar el json de usuarios
+        # Cargamos el json de usuarios
         self.users_db = load_json(self.users_file)
         
-        # Verificar si el usuario ya existe
+        # Verificamos si el usuario ya existe
         if usuario not in self.users_db:
             print(f"Usuario '{usuario}' no existe")
             return False
         
-        # Obtener el hash almacenado
+        # Obtenemos el hash almacenado
         hash_almacenado = self.users_db[usuario]['hash']
         
-        # Verificar la contraseña con Argon2
+        # Verificamos la contraseña con Argon2
         try:
             self.ph.verify(hash_almacenado, usuario + contraseña) 
             
-            # Actualizar último login
+            # Actualizamos último login
             self.users_db[usuario]['ultimo_login'] = datetime.now().isoformat()
             save_json(self.users_file, self.users_db)
             
@@ -171,7 +170,7 @@ class SistemaAutenticacion:
             
             return True
         
-        # Si la verificación falla, se lanza VerifyMismatchError (exception de la biblioteca de argon)
+        # Si la verificación falla, se lanza VerifyMismatchError (excepción de la biblioteca de argon)
         except VerifyMismatchError:
             print(f"Contraseña incorrecta para usuario '{usuario}'")
             return False

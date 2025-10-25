@@ -28,9 +28,8 @@ def main():
         if opcion == "1":
             usuario = input("Nombre de usuario: ").strip()
             contraseña = input("Contraseña: ").strip()
-            email = input("Email (opcional): ").strip() or None
 
-            if autenticacion.registrar_usuario(usuario, contraseña, email):
+            if autenticacion.registrar_usuario(usuario, contraseña):
                 print("Usuario registrado correctamente.")
             else:
                 print("No se pudo registrar el usuario.")
