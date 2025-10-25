@@ -55,8 +55,30 @@ class CifradoHibrido:
             format=serialization.PublicFormat.SubjectPublicKeyInfo
         ).decode()
 
+        # Guardamos las claves en archivos .pem
         save_clave_privada(usuario, private_pem)
         save_clave_publica(usuario, public_pem)
+
+        # Guardamos la clave pública en keys.json
+        self.keys_db[usuario] = {
+            'clave_publica': public_pem,
+            'fecha_creacion': datetime.now().isoformat()
+        }
+        save_json(self.keys_file, self.keys_db)
+        print(f"Clave pública de '{usuario}' guardada en keys.json")
+
+
+    def cargar_clave_publica_desde_json(self, usuario):
+        """Carga la clave pública de un usuario desde keys.json"""
+        self.keys_db = load_json(self.keys_file)
+        
+        if usuario not in self.keys_db:
+            raise ValueError(f"No se encontró la clave pública de '{usuario}' en keys.json")
+        
+        public_pem = self.keys_db[usuario]['clave_publica']
+        public_key = serialization.load_pem_public_key(public_pem.encode())
+        
+        return public_key
 
 
     def encriptado_hibrido(self, emisor, receptor, texto):
@@ -71,8 +93,8 @@ class CifradoHibrido:
         # Ciframos el mensaje con la clave simétrica
         texto_cifrado = fernet.encrypt(texto.encode())
 
-        # Ciframos la clave simétrica con la clave pública del receptor
-        public_key = cargar_clave_publica(receptor)
+        # Ciframos la clave simétrica con la clave pública del receptor (desde keys.json)
+        public_key = self.cargar_clave_publica_desde_json(receptor)
         clave_simetrica_cifrada = public_key.encrypt(
             clave_simetrica,
             padding.OAEP(
