@@ -4,7 +4,7 @@ import re
 from datetime import datetime
 from funciones_json import load_json, save_json, initialize_files
 from crear_usuarios import initialize_folder
-from encriptado_asimetrico import CifradoAsimetrico
+from encriptado_hibrido import CifradoHibrido
 
 USERS_FILE = r"jsons\users.json"
 
@@ -129,7 +129,7 @@ class SistemaAutenticacion:
         initialize_folder(usuario)
 
         # Generar claves
-        cripto = CifradoAsimetrico()
+        cripto = CifradoHibrido()
         cripto.generar_claves(usuario)
         
         print("Usuario registrado correctamente\n")

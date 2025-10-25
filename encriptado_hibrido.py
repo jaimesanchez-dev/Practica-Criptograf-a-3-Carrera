@@ -2,20 +2,19 @@ from cryptography.hazmat.primitives.asymmetric import rsa
 from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.primitives.asymmetric import padding
 from cryptography.hazmat.primitives import hashes
+from cryptography.fernet import Fernet
 
 from funciones_json import load_json, save_json, initialize_files
 from crear_usuarios import save_clave_privada, save_clave_publica, cargar_clave_privada, cargar_clave_publica
 
-import re
 from datetime import datetime
-import os
 
 USERS_FILE = r"jsons\users.json"
 MESSAGES_FILE = r"jsons\messages.json"
 KEYS_FILE = r"jsons\keys.json"
 
-class CifradoAsimetrico:
-    """Clase que se encarga del cifrado asimétrico de mensajes"""
+class CifradoHibrido:
+    """Clase que se encarga del cifrado híbrido de mensajes (asimétrico + simétrico)"""
 
     def __init__(self, users_file=USERS_FILE, messages_file=MESSAGES_FILE, keys_file=KEYS_FILE):
         """Inicializamos el sistema de cifrado"""
@@ -44,7 +43,7 @@ class CifradoAsimetrico:
         # Creamos la clave pública a partir de la privada
         public_key = private_key.public_key()
 
-        # Guardamos las claves privada en la carpeta del usuario
+        # Guardamos las claves en formato PEM
         private_pem = private_key.private_bytes(
             encoding=serialization.Encoding.PEM,
             format=serialization.PrivateFormat.PKCS8,
@@ -60,41 +59,56 @@ class CifradoAsimetrico:
         save_clave_publica(usuario, public_pem)
 
 
-    def encriptado_asimetrico(self, emisor, receptor, texto):
-        """Función que encripta un mensaje"""
-        # Cargamos los mensajes y la clave pública del receptor
+    def encriptado_hibrido(self, emisor, receptor, texto):
+        """
+        Función que encripta un mensaje usando cifrado híbrido:
+        1. Genera una clave simétrica aleatoria
+        2. Cifra el mensaje con la clave simétrica (Fernet)
+        3. Cifra la clave simétrica con la clave pública del receptor (RSA)
+        """
+        # Cargamos los mensajes
         self.messages_db = load_json(self.messages_file)
 
-        public_key = cargar_clave_publica(receptor)
+        # PASO 1: Generar clave simétrica temporal para este mensaje
+        clave_simetrica = Fernet.generate_key()
+        fernet = Fernet(clave_simetrica)
 
-        # Ciframos el mensaje
-        texto_cifrado = public_key.encrypt(
-            texto.encode(),     # Pasamos el mensaje a bytes
-            padding.OAEP(       # Rellenamos el mensaje para hacerlo más seguro
+        # PASO 2: Cifrar el mensaje con la clave simétrica
+        texto_cifrado = fernet.encrypt(texto.encode())
+
+        # PASO 3: Cifrar la clave simétrica con la clave pública del receptor
+        public_key = cargar_clave_publica(receptor)
+        clave_simetrica_cifrada = public_key.encrypt(
+            clave_simetrica,
+            padding.OAEP(
                 mgf=padding.MGF1(algorithm=hashes.SHA256()),
                 algorithm=hashes.SHA256(),
                 label=None
             )
         )
 
-        # Guardamos el mensaje
+        # PASO 4: Guardar el mensaje con ambos componentes
         mensaje = {
             "emisor": emisor,
             "receptor": receptor,
             "fecha_envio": datetime.now().isoformat(),
-            "texto_cifrado": texto_cifrado.hex()    # Pasamos el texto a hexadecimal para poder guardarlo
+            "clave_cifrada": clave_simetrica_cifrada.hex(),  # Clave simétrica cifrada con RSA
+            "texto_cifrado": texto_cifrado.decode()           # Mensaje cifrado con Fernet
         }
 
         self.messages_db["mensajes"].append(mensaje)
         save_json(self.messages_file, self.messages_db)
 
-        print(f"Mensaje cifrado de {emisor} para {receptor}\n")
+        print(f"Mensaje cifrado (híbrido) de {emisor} para {receptor}\n")
         return True
     
 
-    def desencriptado_asimetrico(self, usuario):
-        """Desencripta los mensajes que le enviaron al usuario"""
-
+    def desencriptado_hibrido(self, usuario):
+        """
+        Desencripta los mensajes usando cifrado híbrido:
+        1. Descifra la clave simétrica con la clave privada del usuario (RSA)
+        2. Descifra el mensaje con la clave simétrica (Fernet)
+        """
         self.messages_db = load_json(self.messages_file)
 
         # Buscar los mensajes que le enviaron al usuario
@@ -110,12 +124,10 @@ class CifradoAsimetrico:
         print(f"--- Bandeja de entrada de {usuario} ---\n")
         for mensaje in inbox:
             try:
-                # Convertir el texto cifrado de hex a bytes
-                texto_bytes = bytes.fromhex(mensaje["texto_cifrado"])
-
-                # Descifrar el mensaje
-                texto_plano = private_key.decrypt(
-                    texto_bytes,
+                # PASO 1: Descifrar la clave simétrica con la clave privada (RSA)
+                clave_cifrada_bytes = bytes.fromhex(mensaje["clave_cifrada"])
+                clave_simetrica = private_key.decrypt(
+                    clave_cifrada_bytes,
                     padding.OAEP(
                         mgf=padding.MGF1(algorithm=hashes.SHA256()),
                         algorithm=hashes.SHA256(),
@@ -123,8 +135,12 @@ class CifradoAsimetrico:
                     )
                 )
 
+                # PASO 2: Descifrar el mensaje con la clave simétrica (Fernet)
+                fernet = Fernet(clave_simetrica)
+                texto_plano = fernet.decrypt(mensaje["texto_cifrado"].encode()).decode()
+
                 print(f"De: {mensaje['emisor']} | Fecha: {mensaje['fecha_envio']}\n")
-                print(f"   Mensaje: {texto_plano.decode()}\n")
+                print(f"   Mensaje: {texto_plano}\n")
 
             except Exception as e:
                 print(f"No se pudo descifrar un mensaje: {e}")
