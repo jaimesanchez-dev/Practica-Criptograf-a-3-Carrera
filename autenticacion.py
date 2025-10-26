@@ -43,7 +43,7 @@ class SistemaAutenticacion:
             print("El nombre de usuario no puede exceder 20 caracteres")
             return False
         
-        # Si el nombre de usuario no contiene únicamente letras, números, y guión bajo devuelve, False
+        # Si el nombre de usuario no contiene únicamente letras, números, y guión bajo, devuelve False
         if not re.match(r'^[A-Z0-9_]', usuario):
             print("El nombre de usuario solo puede contener letras, números y guiones bajos")
             return False

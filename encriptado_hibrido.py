@@ -64,6 +64,7 @@ class CifradoHibrido:
             'clave_publica': public_pem,
             'fecha_creacion': datetime.now().isoformat()
         }
+        
         save_json(self.keys_file, self.keys_db)
         print(f"Clave pública de '{usuario}' guardada en keys.json")
 
