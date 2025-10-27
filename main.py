@@ -1,5 +1,6 @@
 from autenticacion import SistemaAutenticacion
 from encriptado_hibrido import CifradoHibrido
+import getpass
 
 def menu_principal():
     print("====================================")
@@ -27,7 +28,7 @@ def main():
         # Registro
         if opcion == "1":
             usuario = input("Nombre de usuario: ").strip()
-            contraseña = input("Contraseña: ").strip()
+            contraseña = getpass.getpass("Contraseña: ").strip()
 
             if autenticacion.registrar_usuario(usuario, contraseña):
                 print("Usuario registrado correctamente.")
@@ -37,7 +38,7 @@ def main():
         # Login
         elif opcion == "2":
             usuario = input("Usuario: ").strip()
-            contraseña = input("Contraseña: ").strip()
+            contraseña = getpass.getpass("Contraseña: ").strip()
 
             if autenticacion.login(usuario, contraseña):
                 print(f"\nBienvenido, {usuario}!")
