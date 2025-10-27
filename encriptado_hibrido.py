@@ -96,7 +96,6 @@ class CifradoHibrido:
         # Ciframos el mensaje con la clave simétrica
         texto_cifrado = fernet.encrypt(texto.encode())
 
-
         # Generamos una clave separada para el MAC
         clave_mac = Fernet.generate_key()  # 32 bytes aleatorios
 
@@ -115,8 +114,6 @@ class CifradoHibrido:
                 label=None
             )
         )
-
-
 
         clave_mac_cifrada = public_key.encrypt(
         clave_mac,
