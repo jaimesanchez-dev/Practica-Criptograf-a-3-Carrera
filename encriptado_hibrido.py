@@ -4,6 +4,9 @@ from cryptography.hazmat.primitives.asymmetric import padding
 from cryptography.hazmat.primitives import hashes
 from cryptography.fernet import Fernet
 
+from cryptography.hazmat.primitives import hmac
+from cryptography.hazmat.primitives import hashes
+
 from funciones_json import load_json, save_json, initialize_files
 from crear_usuarios import save_clave_privada, save_clave_publica, cargar_clave_privada, cargar_clave_publica
 
@@ -64,7 +67,6 @@ class CifradoHibrido:
             'clave_publica': public_pem,
             'fecha_creacion': datetime.now().isoformat()
         }
-        
         save_json(self.keys_file, self.keys_db)
         print(f"Clave pública de '{usuario}' guardada en keys.json")
 
@@ -94,6 +96,15 @@ class CifradoHibrido:
         # Ciframos el mensaje con la clave simétrica
         texto_cifrado = fernet.encrypt(texto.encode())
 
+
+        # Generamos una clave separada para el MAC
+        clave_mac = Fernet.generate_key()  # 32 bytes aleatorios
+
+        # Calculamos el HMAC-SHA256 sobre el texto cifrado
+        h = hmac.HMAC(clave_mac, hashes.SHA256())
+        h.update(texto_cifrado)
+        mac = h.finalize()
+
         # Ciframos la clave simétrica con la clave pública del receptor (desde keys.json)
         public_key = self.cargar_clave_publica_desde_json(receptor)
         clave_simetrica_cifrada = public_key.encrypt(
@@ -105,13 +116,27 @@ class CifradoHibrido:
             )
         )
 
+
+
+        clave_mac_cifrada = public_key.encrypt(
+        clave_mac,
+        padding.OAEP(
+            mgf=padding.MGF1(algorithm=hashes.SHA256()),
+            algorithm=hashes.SHA256(),
+            label=None
+            )
+        )
+
         # Guardamos el mensaje con ambos componentes
         mensaje = {
             "emisor": emisor,
             "receptor": receptor,
             "fecha_envio": datetime.now().isoformat(),
             "clave_cifrada": clave_simetrica_cifrada.hex(),
-            "texto_cifrado": texto_cifrado.decode()
+            "texto_cifrado": texto_cifrado.decode(),
+
+            "clave_mac_cifrada": clave_mac_cifrada.hex(),
+            "mac": mac.hex()
         }
 
         self.messages_db["mensajes"].append(mensaje)
@@ -148,6 +173,24 @@ class CifradoHibrido:
                         label=None
                     )
                 )
+
+                clave_mac = private_key.decrypt(
+                bytes.fromhex(mensaje["clave_mac_cifrada"]),
+                padding.OAEP(
+                    mgf=padding.MGF1(algorithm=hashes.SHA256()),
+                    algorithm=hashes.SHA256(),
+                    label=None
+                    )
+                )   
+
+                #Comprobamos si el mac es valido
+
+                texto_cifrado = mensaje["texto_cifrado"].encode()
+                mac_recibido = bytes.fromhex(mensaje["mac"])
+
+                h = hmac.HMAC(clave_mac, hashes.SHA256())
+                h.update(texto_cifrado)
+                h.verify(mac_recibido)
 
                 # Desciframos el mensaje con la clave simétrica
                 fernet = Fernet(clave_simetrica)
