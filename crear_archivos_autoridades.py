@@ -46,3 +46,9 @@ def cargar_clave_publica(autoridad):
         public_key = serialization.load_pem_public_key(f.read())
 
     return public_key
+
+def save_certificado(autoridad, cert_pem):
+
+    path = f"jsons\\certificados\\{autoridad}_cert.pem"
+    with open(path, "w", encoding="utf-8") as f:
+        f.write(cert_pem)
