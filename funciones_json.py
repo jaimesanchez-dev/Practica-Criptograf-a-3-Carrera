@@ -35,3 +35,8 @@ def initialize_files(users_file=r"jsons\users.json", messages_file=r"jsons\messa
     if not os.path.exists(keys_file):
         save_json(keys_file, {})
         print(f"Archivo '{keys_file}' creado")
+
+    # Crea carpeta de los certificados si no existe
+    if not os.path.exists("jsons\\certificados"):
+        os.mkdir("jsons\\certificados")
+        print(f"Directorio 'jsons\\certificados' creado")
