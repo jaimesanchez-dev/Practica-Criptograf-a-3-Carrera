@@ -27,6 +27,7 @@ class AutoridadCertificacion:
         
         # Inicializar archivos ----------------------Creo qeu habrá que quitarlo
         initialize_files() 
+        self._crear_carpetas()
 
 
     def _crear_carpetas(self):
@@ -46,7 +47,7 @@ class AutoridadCertificacion:
             usuarios_path = f"{ca_path}\\usuarios"
             if not os.path.exists(usuarios_path):
                 os.makedirs(usuarios_path)
-                print(f"Carpeta de usuarios de {self.name} creada: {usuarios_path}")
+                print(f"Carpeta de usuarios de {self.nombre} creada: {usuarios_path}")
     
 
     def determinar_raiz(self):
@@ -138,8 +139,6 @@ class AutoridadCertificacion:
 
     def _guardar_claves(self):
         """Guarda las claves privada y pública de la CA"""
-        # Determinamos la ruta
-        path = self.determinar_raiz()
 
         # Guardar clave privada
         private_pem = self.clave_privada.private_bytes(
@@ -148,11 +147,7 @@ class AutoridadCertificacion:
             encryption_algorithm=serialization.NoEncryption()
         ).decode()
         
-        path_private = f"{path}\\claveprivada.pem"
-        with open(path_private, "w", encoding="utf-8") as f:
-            f.write(private_pem)
-        
-        print(f"Clave privada CA guardada en '{path_private}'")
+        self.guardar_clave_privada(private_pem)
         
         # Guardar clave pública
         public_pem = self.clave_publica.public_bytes(
@@ -160,11 +155,7 @@ class AutoridadCertificacion:
             format=serialization.PublicFormat.SubjectPublicKeyInfo
         ).decode()
         
-        path_public = f"{path}\\clavepublica.pem"
-        with open(path_public, "w", encoding="utf-8") as f:
-            f.write(public_pem)
-        
-        print(f"Clave pública CA guardada en '{path_public}'")
+        self.guardar_clave_pública(public_pem)
 
 
     def crear_certificado_raiz(self):
