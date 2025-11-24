@@ -11,7 +11,6 @@ class GestorCertificadosUsuarios:
     def __init__(self):
         self.ca_raiz = None
         self.acs_subordinadas = {}  # Diccionario de ACs subordinadas
-        self.verificador = VerificadorCadena()
         self._cargar_cas()
     
     def _cargar_cas(self):
@@ -88,7 +87,9 @@ class GestorCertificadosUsuarios:
         Verifica la cadena completa de certificados del usuario
         Usuario → AC Subordinada → CA Raíz
         """
-        valido, mensaje = self.verificador.verificar_cadena_completa(usuario)
+        verificador = VerificadorCadena()
+
+        valido, mensaje = verificador.verificar_cadena_completa(usuario)
         
         if not valido:
             print(f"[PKI] ✗ Certificado NO válido: {mensaje}")

@@ -12,6 +12,9 @@ from crear_usuarios import save_clave_privada, save_clave_publica, cargar_clave_
 
 from datetime import datetime
 
+from firmas import firma_mensaje, verificar_firma
+from crear_usuarios import cargar_clave_privada
+
 USERS_FILE = r"jsons\users.json"
 MESSAGES_FILE = r"jsons\messages.json"
 KEYS_FILE = r"jsons\keys.json"
@@ -104,6 +107,8 @@ class CifradoHibrido:
         h.update(texto_cifrado)
         mac = h.finalize()
 
+        firma = firma_mensaje(self.cargar_clave_privada_desde_json(emisor), texto)
+
         # Ciframos la clave simétrica con la clave pública del receptor (desde keys.json)
         public_key = self.cargar_clave_publica_desde_json(receptor)
         clave_simetrica_cifrada = public_key.encrypt(
@@ -133,13 +138,14 @@ class CifradoHibrido:
             "texto_cifrado": texto_cifrado.decode(),
 
             "clave_mac_cifrada": clave_mac_cifrada.hex(),
-            "mac": mac.hex()
+            "mac": mac.hex(),
+            "firma":firma.hex()
         }
 
         self.messages_db["mensajes"].append(mensaje)
         save_json(self.messages_file, self.messages_db)
 
-        print(f"Mensaje cifrado (híbrido) de {emisor} para {receptor}\n")
+        print(f"Mensaje cifrado y firmado (híbrido) de {emisor} para {receptor}\n")
         return True
     
 
@@ -188,6 +194,16 @@ class CifradoHibrido:
                 h = hmac.HMAC(clave_mac, hashes.SHA256())
                 h.update(texto_cifrado)
                 h.verify(mac_recibido)
+                
+                #Comprobamos si la firma es correcta
+                if "firma" in mensaje:
+                    firma = bytes.fromhex(mensaje["firma"])
+                    clave_publica_emisor = self.cargar_clave_publica_desde_json(mensaje["emisor"])
+                    
+                    if verificar_firma(clave_publica_emisor, texto_cifrado, firma):
+                        print(f"   [✓] Firma digital verificada correctamente")
+                    else:
+                        print(f"   [✗] ADVERTENCIA: Firma digital NO válida")
 
                 # Desciframos el mensaje con la clave simétrica
                 fernet = Fernet(clave_simetrica)

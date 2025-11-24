@@ -119,7 +119,18 @@ class AutoridadCertificacion:
             encoding=serialization.Encoding.PEM
         ).decode()
 
-        save_certificado(self.nombre, cert_pem)
+        # Guardar en la carpeta de la CA
+        ca_path = self.determinar_raiz()
+        cert_file = f"{ca_path}\\certificado.pem"
+        
+        with open(cert_file, "w", encoding="utf-8") as f:
+            f.write(cert_pem)
+        print(f"Certificado guardado en '{cert_file}'")
+        
+        # También guardar en la raíz de certificados para compatibilidad
+        cert_pem_raiz = f"jsons\\certificados\\{self.nombre}_cert.pem"
+        with open(cert_pem_raiz, "w", encoding="utf-8") as f:
+            f.write(cert_pem)
         
         # También guardar en JSON para referencia
         certs_db = load_json(self.certs_file)

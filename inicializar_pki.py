@@ -9,7 +9,6 @@ def inicializar_pki():
     # Crear CA Raíz
     print("[1/4] Creando Autoridad de Certificación Raíz...")
     ca_raiz = AutoridadCertificacion(nombre="CA_Raiz", es_raiz=True)
-    initialize_folder("CA_Raiz")
     ca_raiz.crear_certificado_raiz()
     
     # Crear AC Subordinada A
@@ -19,7 +18,6 @@ def inicializar_pki():
         es_raiz=False,
         ca_superior=ca_raiz
     )
-    initialize_folder("AC_Subordinada_A")
     ac_a.crear_certificado_subordinado()
     
     # Crear AC Subordinada B
@@ -29,7 +27,6 @@ def inicializar_pki():
         es_raiz=False,
         ca_superior=ca_raiz
     )
-    initialize_folder("AC_Subordinada_B")
     ac_b.crear_certificado_subordinado()
     
     print("\n[4/4] PKI inicializada correctamente")
