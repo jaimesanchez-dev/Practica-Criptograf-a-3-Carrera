@@ -6,8 +6,6 @@ from cryptography.hazmat.primitives import hashes, serialization
 from cryptography.hazmat.primitives.asymmetric import rsa
 from funciones_json import save_json, load_json, initialize_files
 import os
-from crear_archivos_autoridades import save_clave_privada, save_clave_publica, cargar_clave_privada, cargar_clave_publica, save_certificado
-
 from datetime import datetime, timedelta
 
 CERTS_FILE = r"jsons\certificates.json"
@@ -25,9 +23,9 @@ class AutoridadCertificacion:
         self.certificado = None
         self.certs_file = CERTS_FILE
         
-        # Inicializar archivos ----------------------Creo qeu habrá que quitarlo
-        initialize_files() 
         self._crear_carpetas()
+        
+        initialize_files() 
 
 
     def _crear_carpetas(self):
@@ -40,14 +38,14 @@ class AutoridadCertificacion:
         # Crear todas las carpetas necesarias
         if not os.path.exists(ca_path):
             os.makedirs(ca_path)
-            print(f"Carpeta creada: {ca_path}")
+            print(f"Carpeta creada: {ca_path}\n")
             
         # Crear carpeta de usuarios solo si es subordinada
         if not self.es_raiz:
             usuarios_path = f"{ca_path}\\usuarios"
             if not os.path.exists(usuarios_path):
                 os.makedirs(usuarios_path)
-                print(f"Carpeta de usuarios de {self.nombre} creada: {usuarios_path}")
+                print(f"Carpeta de usuarios de {self.nombre} creada: {usuarios_path}\n")
     
 
     def determinar_raiz(self):
@@ -70,7 +68,7 @@ class AutoridadCertificacion:
         
         with open(ca_path, "w", encoding="utf-8") as f:
             f.write(clave_pem)
-        print(f"Clave privada guardada en '{ca_path}'")
+        print(f"Clave privada guardada en '{ca_path}'\n")
 
 
     def guardar_clave_pública(self, clave_pem):
@@ -80,10 +78,10 @@ class AutoridadCertificacion:
         
         with open(ca_path, "w", encoding="utf-8") as f:
             f.write(clave_pem)
-        print(f"Clave privada guardada en '{ca_path}'")
+        print(f"Clave privada guardada en '{ca_path}'\n")
     
 
-    def cargar_clave_privada(self, autoridad):
+    def cargar_clave_privada(self):
         """Lee y devuelve la clave privada del autoridad desde su archivo .pem"""
 
         ca_path = self.determinar_raiz() + "\\claveprivada.pem"
@@ -93,7 +91,7 @@ class AutoridadCertificacion:
         return private_key
 
 
-    def cargar_clave_publica(self, autoridad):
+    def cargar_clave_publica(self):
         """Lee y devuelve la clave pública del autoridad desde su archivo .pem"""
 
         ca_path = self.determinar_raiz() + "\\claveprivada.pem"
@@ -113,23 +111,15 @@ class AutoridadCertificacion:
         self.clave_publica = self.clave_privada.public_key()
 
 
-    def _guardar_certificado(self):
+    def guardar_certificado(self):
         """Guarda el certificado de la CA en formato PEM"""
         cert_pem = self.certificado.public_bytes(
             encoding=serialization.Encoding.PEM
         ).decode()
 
-        # Guardar en la carpeta de la CA
-        ca_path = self.determinar_raiz()
-        cert_file = f"{ca_path}\\certificado.pem"
-        
-        with open(cert_file, "w", encoding="utf-8") as f:
-            f.write(cert_pem)
-        print(f"Certificado guardado en '{cert_file}'")
-        
-        # También guardar en la raíz de certificados para compatibilidad
-        cert_pem_raiz = f"jsons\\certificados\\{self.nombre}_cert.pem"
-        with open(cert_pem_raiz, "w", encoding="utf-8") as f:
+        # Guardamos el certificado en PEM
+        path = f"jsons\\certificados\\{self.nombre}_cert.pem"
+        with open(path, "w", encoding="utf-8") as f:
             f.write(cert_pem)
         
         # También guardar en JSON para referencia
@@ -148,7 +138,7 @@ class AutoridadCertificacion:
         save_json(self.certs_file, certs_db)
 
 
-    def _guardar_claves(self):
+    def guardar_claves(self):
         """Guarda las claves privada y pública de la CA"""
 
         # Guardar clave privada
@@ -172,7 +162,7 @@ class AutoridadCertificacion:
     def crear_certificado_raiz(self):
         """Crea un certificado autofirmado para la CA raíz"""
         if not self.es_raiz:
-            raise ValueError("Solo las CA raíz pueden crear certificados autofirmados")
+            raise ValueError("Solo las CA raíz pueden crear certificados autofirmados\n")
         
         # Generar claves
         self.generar_claves()
@@ -202,16 +192,17 @@ class AutoridadCertificacion:
         self._guardar_certificado()
         self._guardar_claves()
         
-        print(f"[PKI] Certificado raíz creado para '{self.nombre}'")
+        print(f"Certificado raíz creado para '{self.nombre}'\n")
         return self.certificado
         
+
     def crear_certificado_subordinado(self):
         """Crea un certificado para una CA subordinada"""
         if self.es_raiz:
-            raise ValueError("Este método es para CA subordinadas")
+            raise ValueError("Este método es para CA subordinadas\n")
         
         if not self.ca_superior:
-            raise ValueError("Debe especificarse la CA superior")
+            raise ValueError("Debe especificarse la CA superior\n")
         
         # Generar claves
         self.generar_claves()
@@ -241,8 +232,9 @@ class AutoridadCertificacion:
         self._guardar_certificado()
         self._guardar_claves()
         
-        print(f"[PKI] Certificado subordinado creado para '{self.nombre}'")
+        print(f"Certificado subordinado creado para '{self.nombre}'\n")
         return self.certificado
+
 
     def emitir_certificado_usuario(self, usuario, clave_publica_usuario):
         """Emite un certificado para un usuario final"""
@@ -273,7 +265,7 @@ class AutoridadCertificacion:
         with open(path, "w", encoding="utf-8") as f:
             f.write(cert_pem)
         
-        print(f"[PKI] Certificado emitido para usuario '{usuario}'")
+        print(f"Certificado emitido para usuario '{usuario}'\n")
         
         # Guardar en JSON para referencia usando funciones_json
         certs_db = load_json(self.certs_file)
@@ -292,6 +284,7 @@ class AutoridadCertificacion:
         
         return cert_usuario
     
+
     def cargar_desde_archivos(self):
         """Carga el certificado y la clave privada desde archivos usando crear_archivos_autoridades"""
         # Cargar certificado
@@ -300,16 +293,16 @@ class AutoridadCertificacion:
             with open(cert_path, "rb") as f:
                 self.certificado = x509.load_pem_x509_certificate(f.read())
         
-        # Cargar clave privada usando función de crear_archivos_autoridades
+        # Cargar claves
         try:
-            self.clave_privada = cargar_clave_privada(self.nombre)
+            self.clave_privada = self.cargar_clave_privada()
             self.clave_publica = self.clave_privada.public_key()
         except:
             pass
 
 
-def cargar_certificado(path):
-    """Carga un certificado desde un archivo PEM"""
-    with open(path, "rb") as f:
-        cert_data = f.read()
-    return x509.load_pem_x509_certificate(cert_data)
+    def cargar_certificado(path):
+        """Carga un certificado desde un archivo PEM"""
+        with open(path, "rb") as f:
+            cert_data = f.read()
+        return x509.load_pem_x509_certificate(cert_data)

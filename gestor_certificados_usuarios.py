@@ -10,7 +10,7 @@ class GestorCertificadosUsuarios:
     """Gestiona la emisión y verificación de certificados de usuarios con múltiples ACs"""
     
     def __init__(self):
-        self.acs_subordinadas = {}  # Diccionario de ACs subordinadas
+        self.acs_subordinadas = {}  # Diccionario de autoridades subordinadas
         
         # Cargamos las autoridades subordinadas en el diccionario
         self._cargar_cas()
@@ -22,7 +22,7 @@ class GestorCertificadosUsuarios:
             cert_dir = "jsons\\certificados"
             
             if not os.path.exists(cert_dir):
-                print("No existe la carpeta de certificados")
+                print("No existe la carpeta de certificados\n")
                 return
             
             # Buscar la raíz
@@ -30,7 +30,7 @@ class GestorCertificadosUsuarios:
                            if os.path.isdir(os.path.join(cert_dir, d))]
             
             if not carpetas_raiz:
-                print("No se encontró ninguna carpeta raíz")
+                print("No se encontró ninguna carpeta raíz\n")
                 return
             
             # Tomar la primera carpeta como raíz (solo hay una)
@@ -45,7 +45,7 @@ class GestorCertificadosUsuarios:
                                     if os.path.isdir(os.path.join(ca_raiz_path, d))]
             
             if not carpetas_subordinadas:
-                print("No se encontraron autoridades subordinadas")
+                print("No se encontraron autoridades subordinadas\n")
                 return
             
             # Cargar cada CA subordinada
@@ -62,15 +62,15 @@ class GestorCertificadosUsuarios:
                     )
                     ac.cargar_desde_archivos()
                     self.acs_subordinadas[nombre_ac_sub] = ac
-                    print(f"Autoridad subordinada '{nombre_ac_sub}' cargada")
+                    print(f"Autoridad subordinada '{nombre_ac_sub}' cargada\n")
                 else:
-                    print(f"No se encontró certificado en {ac_sub_path}")
+                    print(f"No se encontró certificado en {ac_sub_path}\n")
             
             if not self.acs_subordinadas:
-                print("No se cargaron las autoridades subordinadas válidas")
+                print("No se cargaron las autoridades subordinadas válidas\n")
                 
         except Exception as e:
-            print(f"Error al cargar autoridades: {e}")
+            print(f"Error al cargar autoridades: {e}\n")
     
 
     def listar_acs_disponibles(self):
@@ -82,7 +82,7 @@ class GestorCertificadosUsuarios:
         """Emite un certificado a un usuario desde una AC específica
         Si no se especifica AC, usa la primera disponible"""
         if not self.acs_subordinadas:
-            print("[PKI] Error: No hay ACs subordinadas disponibles")
+            print("No hay autoridades subordinadas disponibles\n")
             return False
         
         # Elegir una AC subordinada aleatoria
@@ -96,24 +96,22 @@ class GestorCertificadosUsuarios:
             ac = self.acs_subordinadas[nombre_ac]
             ac.emitir_certificado_usuario(usuario, clave_publica)
             
-            print(f"[PKI] ✓ Certificado emitido para '{usuario}' por '{nombre_ac}'")
+            print(f"Certificado emitido para '{usuario}' por '{nombre_ac}'\n")
             return True
         except Exception as e:
-            print(f"[PKI] Error al emitir certificado: {e}")
+            print(f"Error al emitir certificado: {e}\n")
             return False
     
 
     def verificar_certificado_usuario(self, usuario):
-        """
-        Verifica la cadena completa de certificados del usuario
-        Usuario → AC Subordinada → CA Raíz
-        """
+        """Verifica la cadena completa de certificados del usuario
+            Usuario -> CA Subordinada -> CA Raíz"""
         verificador = VerificadorCadena()
 
         valido, mensaje = verificador.verificar_cadena_completa(usuario)
         
         if not valido:
-            print(f"[PKI] ✗ Certificado NO válido: {mensaje}")
+            print(f"Certificado no válido: {mensaje}\n")
         
         return valido
     
@@ -126,7 +124,7 @@ class GestorCertificadosUsuarios:
                 return cargar_certificado(cert_path)
             return None
         except Exception as e:
-            print(f"[PKI] Error al cargar certificado: {e}")
+            print(f"Error al cargar certificado: {e}\n")
             return None
     
 
@@ -138,7 +136,7 @@ class GestorCertificadosUsuarios:
         
         # Extraer el nombre de la AC emisora
         issuer_cn = cert.issuer.get_attributes_for_oid(x509.oid.NameOID.COMMON_NAME)
-        nombre_ac = issuer_cn[0].value if issuer_cn else "Desconocida"
+        nombre_ac = issuer_cn[0].value if issuer_cn else "Desconocida\n"
         
         return {
             "usuario": usuario,
