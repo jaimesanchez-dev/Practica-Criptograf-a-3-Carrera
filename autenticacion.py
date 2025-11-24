@@ -130,6 +130,7 @@ class SistemaAutenticacion:
         # Generamos claves
         cripto = CifradoHibrido()
         cripto.generar_claves(usuario)
+
         
         print("Usuario registrado correctamente\n")
         print(f"   - Usuario: {usuario}\n")
