@@ -15,6 +15,13 @@ from datetime import datetime
 from firmas import firma_mensaje, verificar_firma
 from crear_usuarios import cargar_clave_privada
 
+from cryptography import x509
+from cryptography.x509.oid import NameOID
+
+from verificador_cadenas import VerificadorCadena
+
+import os
+
 USERS_FILE = r"jsons\users.json"
 MESSAGES_FILE = r"jsons\messages.json"
 KEYS_FILE = r"jsons\keys.json"
@@ -107,8 +114,6 @@ class CifradoHibrido:
         h.update(texto_cifrado)
         mac = h.finalize()
 
-        firma = firma_mensaje(self.cargar_clave_privada_desde_json(emisor), texto)
-
         # Ciframos la clave simétrica con la clave pública del receptor (desde keys.json)
         public_key = self.cargar_clave_publica_desde_json(receptor)
         clave_simetrica_cifrada = public_key.encrypt(
@@ -129,6 +134,16 @@ class CifradoHibrido:
             )
         )
 
+# Lo nuevo
+
+        clave_privada_emisor = cargar_clave_privada(emisor)
+        firma = firma_mensaje(clave_privada_emisor, texto)
+
+        cert_path = f"jsons\\{emisor}\\certificado.pem"
+        with open(cert_path, "r", encoding="utf-8") as f:
+            certificado_emisor = f.read()
+
+
         # Guardamos el mensaje con ambos componentes
         mensaje = {
             "emisor": emisor,
@@ -139,7 +154,8 @@ class CifradoHibrido:
 
             "clave_mac_cifrada": clave_mac_cifrada.hex(),
             "mac": mac.hex(),
-            "firma":firma.hex()
+            "firma":firma.hex(),
+            "certificado_emisor": certificado_emisor
         }
 
         self.messages_db["mensajes"].append(mensaje)
@@ -166,6 +182,30 @@ class CifradoHibrido:
         print(f"--- Bandeja de entrada de {usuario} ---\n")
         for mensaje in inbox:
             try:
+                #Comprobamos el certificado
+
+                if "certificado_emisor" not in mensaje:
+                    print(f"ERROR: Mensaje sin certificado")
+                    continue
+        
+                # Verificar certificado
+                verificador = VerificadorCadena() #Verificamos tod la cadena
+                
+                valido, msg = verificador.verificar_certificado_desde_pem(
+                    certificado_pem=mensaje["certificado_emisor"],
+                    nombre_esperado=mensaje["emisor"]
+                )
+
+                if not valido:
+                    print(f"ERROR: {msg}")
+                    continue
+
+                 # Extraer clave pública del certificado
+                cert_emisor = x509.load_pem_x509_certificate(
+                    mensaje["certificado_emisor"].encode()
+                )
+                clave_publica_emisor = cert_emisor.public_key()
+
                 # Desciframos la clave simétrica con la clave privada
                 clave_cifrada_bytes = bytes.fromhex(mensaje["clave_cifrada"])
                 clave_simetrica = private_key.decrypt(
@@ -198,12 +238,17 @@ class CifradoHibrido:
                 #Comprobamos si la firma es correcta
                 if "firma" in mensaje:
                     firma = bytes.fromhex(mensaje["firma"])
-                    clave_publica_emisor = self.cargar_clave_publica_desde_json(mensaje["emisor"])
                     
                     if verificar_firma(clave_publica_emisor, texto_cifrado, firma):
-                        print(f"   [✓] Firma digital verificada correctamente")
+                        print(f" Firma digital verificada correctamente")
                     else:
-                        print(f"   [✗] ADVERTENCIA: Firma digital NO válida")
+                        print(f" Firma digital NO válida")
+
+                # Comprobamos el nombre del certificado, y la cadena de verificacion
+
+                cert_emisor = x509.load_pem_x509_certificate(
+                    mensaje["certificado_emisor"].encode()
+                )
 
                 # Desciframos el mensaje con la clave simétrica
                 fernet = Fernet(clave_simetrica)

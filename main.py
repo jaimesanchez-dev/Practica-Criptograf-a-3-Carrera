@@ -51,7 +51,9 @@ def main():
                     ac_elegida = acs[0]
                 
                 print(f"\n[PKI] Emitiendo certificado desde '{ac_elegida}'...")
+
                 gestor_certs.emitir_certificado_a_usuario(usuario, ac_elegida)
+                
                 print("\nUsuario registrado correctamente con certificado.\n")
             else:
                 print("No se pudo registrar el usuario.")
