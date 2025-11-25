@@ -95,7 +95,7 @@ class GestorCertificadosUsuarios:
             # Emitir certificado desde la AC especificada
             ac = self.acs_subordinadas[nombre_ac]
             ac.emitir_certificado_usuario(usuario, clave_publica)
-            
+
             print(f"Certificado emitido para '{usuario}' por '{nombre_ac}'\n")
             return True
         except Exception as e:

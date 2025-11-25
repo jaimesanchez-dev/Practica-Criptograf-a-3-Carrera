@@ -63,7 +63,7 @@ class AutoridadCertificacion:
     
     def path_usuarios(self):
         """Devuelve la ruta de donde se encuentra el certificado de un usuario"""
-        return f"jsons\\certificados\\{self.ca_superior.ca_superior.nombre}\\{self.ca_superior.nombre}\\usuarios"
+        return f"jsons\\certificados\\{self.ca_superior.nombre}\\{self.nombre}\\usuarios"
     
 
     def guardar_clave_privada(self, clave_pem):
@@ -259,7 +259,7 @@ class AutoridadCertificacion:
             .public_key(clave_publica_usuario)
             .serial_number(x509.random_serial_number())
             .not_valid_before(datetime.now())
-            .not_valid_after(datetime.now() + timedelta(days=365))  # 1 añito
+            .not_valid_after(datetime.now() + timedelta(days=365))  # 1 año
             .sign(self.clave_privada, hashes.SHA256())
         )
         
@@ -269,7 +269,11 @@ class AutoridadCertificacion:
         ).decode()
         
         path = self.path_usuarios()
-        cert_path = f"{path}\\{self.nombre}_cert.pem"
+        cert_path = f"{path}\\{usuario}_cert.pem"
+        with open(cert_path, "w", encoding="utf-8") as f:
+            f.write(cert_pem)
+
+        cert_path = f"jsons\\{usuario}\\{usuario}_cert.pem"
         with open(cert_path, "w", encoding="utf-8") as f:
             f.write(cert_pem)
         
@@ -285,8 +289,8 @@ class AutoridadCertificacion:
             "emisor": self.nombre,
             "fecha_emision": datetime.now().isoformat(),
             "numero_serie": str(cert_usuario.serial_number),
-            "valido_desde": cert_usuario.not_valid_before.isoformat(),
-            "valido_hasta": cert_usuario.not_valid_after.isoformat()
+            "valido_desde": cert_usuario.not_valid_before_utc.isoformat(),
+            "valido_hasta": cert_usuario.not_valid_after_utc.isoformat(),
         }
         save_json(self.certs_file, certs_db)
         
