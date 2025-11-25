@@ -60,6 +60,11 @@ class AutoridadCertificacion:
 
         return ca_path
     
+    
+    def path_usuarios(self):
+        """Devuelve la ruta de donde se encuentra el certificado de un usuario"""
+        return f"jsons\\certificados\\{self.ca_superior.ca_superior.nombre}\\{self.ca_superior.nombre}\\usuarios"
+    
 
     def guardar_clave_privada(self, clave_pem):
         """Función que guarda la clave privada"""
@@ -72,13 +77,13 @@ class AutoridadCertificacion:
 
 
     def guardar_clave_pública(self, clave_pem):
-        """Función que guarda la clave privada"""
+        """Función que guarda la clave pública"""
 
         ca_path = self.determinar_raiz() + "\\clavepublica.pem"
         
         with open(ca_path, "w", encoding="utf-8") as f:
             f.write(clave_pem)
-        print(f"Clave privada guardada en '{ca_path}'\n")
+        print(f"Clave pública guardada en '{ca_path}'\n")
     
 
     def cargar_clave_privada(self):
@@ -94,7 +99,7 @@ class AutoridadCertificacion:
     def cargar_clave_publica(self):
         """Lee y devuelve la clave pública del autoridad desde su archivo .pem"""
 
-        ca_path = self.determinar_raiz() + "\\claveprivada.pem"
+        ca_path = self.determinar_raiz() + "\\clavepublica.pem"
         with open(ca_path, "rb") as f:
             public_key = serialization.load_pem_public_key(f.read())
 
@@ -118,8 +123,10 @@ class AutoridadCertificacion:
         ).decode()
 
         # Guardamos el certificado en PEM
-        path = f"jsons\\certificados\\{self.nombre}_cert.pem"
-        with open(path, "w", encoding="utf-8") as f:
+        ca_path = self.determinar_raiz()
+        path_carpeta = f"{ca_path}\\certificado.pem"
+
+        with open(path_carpeta, "w", encoding="utf-8") as f:
             f.write(cert_pem)
         
         # También guardar en JSON para referencia
@@ -189,8 +196,8 @@ class AutoridadCertificacion:
         )
         
         # Guardar certificado y claves
-        self._guardar_certificado()
-        self._guardar_claves()
+        self.guardar_certificado()
+        self.guardar_claves()
         
         print(f"Certificado raíz creado para '{self.nombre}'\n")
         return self.certificado
@@ -229,8 +236,8 @@ class AutoridadCertificacion:
         )
         
         # Guardar certificado y claves
-        self._guardar_certificado()
-        self._guardar_claves()
+        self.guardar_certificado()
+        self.guardar_claves()
         
         print(f"Certificado subordinado creado para '{self.nombre}'\n")
         return self.certificado
@@ -256,13 +263,14 @@ class AutoridadCertificacion:
             .sign(self.clave_privada, hashes.SHA256())
         )
         
-        # Guardar el certificado del usuario   ----- Esto se puede pasar a un json de crear_usuarios.py
+        # Guardar el certificado del usuario
         cert_pem = cert_usuario.public_bytes(
             encoding=serialization.Encoding.PEM
         ).decode()
         
-        path = f"jsons\\{usuario}\\certificado.pem"
-        with open(path, "w", encoding="utf-8") as f:
+        path = self.path_usuarios()
+        cert_path = f"{path}\\{self.nombre}_cert.pem"
+        with open(cert_path, "w", encoding="utf-8") as f:
             f.write(cert_pem)
         
         print(f"Certificado emitido para usuario '{usuario}'\n")
@@ -288,7 +296,8 @@ class AutoridadCertificacion:
     def cargar_desde_archivos(self):
         """Carga el certificado y la clave privada desde archivos usando crear_archivos_autoridades"""
         # Cargar certificado
-        cert_path = f"jsons\\certificados\\{self.nombre}_cert.pem"
+        ca_path = self.determinar_raiz()
+        cert_path = f"{ca_path}\\certificado.pem"
         if os.path.exists(cert_path):
             with open(cert_path, "rb") as f:
                 self.certificado = x509.load_pem_x509_certificate(f.read())

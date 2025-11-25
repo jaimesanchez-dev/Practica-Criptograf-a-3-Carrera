@@ -137,7 +137,7 @@ class CifradoHibrido:
 # Lo nuevo
 
         clave_privada_emisor = cargar_clave_privada(emisor)
-        firma = firma_mensaje(clave_privada_emisor, texto)
+        firma = firma_mensaje(clave_privada_emisor, mac)
 
         cert_path = f"jsons\\{emisor}\\certificado.pem"
         with open(cert_path, "r", encoding="utf-8") as f:
@@ -227,7 +227,6 @@ class CifradoHibrido:
                 )   
 
                 #Comprobamos si el mac es valido
-
                 texto_cifrado = mensaje["texto_cifrado"].encode()
                 mac_recibido = bytes.fromhex(mensaje["mac"])
 
