@@ -3,7 +3,7 @@ from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.asymmetric import padding
 from certificado import cargar_certificado
 import os
-from datetime import datetime
+from datetime import datetime, timezone
 
 class VerificadorCadena:
     """Verifica la cadena completa de certificados desde el usuario hasta la CA raíz"""
@@ -61,9 +61,9 @@ class VerificadorCadena:
     
     def verificar_fechas(self, cert):
         """Verifica que el certificado no esté expirado"""
-        ahora = datetime.now()
+        ahora = datetime.now(timezone.utc)
         
-        if not (cert.not_valid_before <= ahora <= cert.not_valid_after):
+        if not (cert.not_valid_before_utc <= ahora <= cert.not_valid_after_utc):
             return False
         return True
     
@@ -93,7 +93,7 @@ class VerificadorCadena:
             nombre_ca_raiz = carpetas_raiz[0]
             ca_raiz_path = os.path.join(cert_dir, nombre_ca_raiz)
 
-            cert_path = os.path.join(ca_raiz_path, nombre_ac, f"{nombre_ac}_cert.pem")
+            cert_path = os.path.join(ca_raiz_path, nombre_ac, "certificado.pem")
             if os.path.exists(cert_path):
                 return cargar_certificado(cert_path)
             else:

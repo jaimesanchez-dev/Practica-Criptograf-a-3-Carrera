@@ -19,7 +19,7 @@ from cryptography import x509
 from cryptography.x509.oid import NameOID
 
 from verificador_cadenas import VerificadorCadena
-
+import base64
 import os
 
 USERS_FILE = r"jsons\users.json"
@@ -137,9 +137,9 @@ class CifradoHibrido:
 # Lo nuevo
 
         clave_privada_emisor = cargar_clave_privada(emisor)
-        firma = firma_mensaje(clave_privada_emisor, mac)
+        firma = firma_mensaje(clave_privada_emisor, texto_cifrado)
 
-        cert_path = f"jsons\\{emisor}\\certificado.pem"
+        cert_path = f"jsons\\{emisor}\\{emisor}_cert.pem"
         with open(cert_path, "r", encoding="utf-8") as f:
             certificado_emisor = f.read()
 
@@ -226,15 +226,9 @@ class CifradoHibrido:
                     )
                 )   
 
-                #Comprobamos si el mac es valido
-                texto_cifrado = mensaje["texto_cifrado"].encode()
-                mac_recibido = bytes.fromhex(mensaje["mac"])
-
-                h = hmac.HMAC(clave_mac, hashes.SHA256())
-                h.update(texto_cifrado)
-                h.verify(mac_recibido)
-                
                 #Comprobamos si la firma es correcta
+                texto_cifrado = mensaje["texto_cifrado"].encode()
+
                 if "firma" in mensaje:
                     firma = bytes.fromhex(mensaje["firma"])
                     
@@ -242,6 +236,15 @@ class CifradoHibrido:
                         print(f" Firma digital verificada correctamente")
                     else:
                         print(f" Firma digital NO válida")
+
+                #Comprobamos si el mac es valido
+                mac_recibido = bytes.fromhex(mensaje["mac"])
+
+                h = hmac.HMAC(clave_mac, hashes.SHA256())
+                h.update(texto_cifrado)
+                h.verify(mac_recibido)
+                
+                
 
                 # Comprobamos el nombre del certificado, y la cadena de verificacion
 
@@ -251,7 +254,7 @@ class CifradoHibrido:
 
                 # Desciframos el mensaje con la clave simétrica
                 fernet = Fernet(clave_simetrica)
-                texto_plano = fernet.decrypt(mensaje["texto_cifrado"].encode()).decode()
+                texto_plano = fernet.decrypt(texto_cifrado).decode()
 
                 print(f"De: {mensaje['emisor']} | Fecha: {mensaje['fecha_envio']}\n")
                 print(f"   Mensaje: {texto_plano}\n")

@@ -119,7 +119,7 @@ class GestorCertificadosUsuarios:
     def obtener_certificado_usuario(self, usuario):
         """Obtiene el certificado de un usuario"""
         try:
-            cert_path = f"jsons\\{usuario}\\certificado.pem"
+            cert_path = f"jsons\\{usuario}\\{usuario}_cert.pem"
             if os.path.exists(cert_path):
                 return cargar_certificado(cert_path)
             return None
@@ -141,7 +141,7 @@ class GestorCertificadosUsuarios:
         return {
             "usuario": usuario,
             "emitido_por": nombre_ac,
-            "valido_desde": cert.not_valid_before,
-            "valido_hasta": cert.not_valid_after,
+            "valido_desde": cert.not_valid_before_utc,
+            "valido_hasta": cert.not_valid_after_utc,
             "numero_serie": cert.serial_number
         }

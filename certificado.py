@@ -6,7 +6,7 @@ from cryptography.hazmat.primitives import hashes, serialization
 from cryptography.hazmat.primitives.asymmetric import rsa
 from funciones_json import save_json, load_json, initialize_files
 import os
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 
 CERTS_FILE = r"jsons\certificates.json"
 
@@ -178,6 +178,8 @@ class AutoridadCertificacion:
         subject = issuer = x509.Name([
             x509.NameAttribute(NameOID.COMMON_NAME, self.nombre),
         ])
+
+        ahora = datetime.now(timezone.utc)
         
         # Crear certificado autofirmado
         self.certificado = (
@@ -186,8 +188,8 @@ class AutoridadCertificacion:
             .issuer_name(issuer)
             .public_key(self.clave_publica)
             .serial_number(x509.random_serial_number())
-            .not_valid_before(datetime.now())
-            .not_valid_after(datetime.now() + timedelta(days=3650))  #10 años
+            .not_valid_before(ahora)
+            .not_valid_after(ahora + timedelta(days=3650))  # 10 años
             .add_extension(
                 x509.BasicConstraints(ca=True, path_length=None),
                 critical=True,
@@ -219,15 +221,18 @@ class AutoridadCertificacion:
             x509.NameAttribute(NameOID.COMMON_NAME, self.nombre),
         ])
         
+        
         # Crear certificado firmado por la CA superior
+        ahora = datetime.now(timezone.utc)
+
         self.certificado = (
             x509.CertificateBuilder()
             .subject_name(subject)
             .issuer_name(self.ca_superior.certificado.subject)
             .public_key(self.clave_publica)
             .serial_number(x509.random_serial_number())
-            .not_valid_before(datetime.now())
-            .not_valid_after(datetime.now() + timedelta(days=1825))  #5 años
+            .not_valid_before(ahora)
+            .not_valid_after(ahora + timedelta(days=1825))  #5 años
             .add_extension(
                 x509.BasicConstraints(ca=True, path_length=0),
                 critical=True,
@@ -252,14 +257,16 @@ class AutoridadCertificacion:
         ])
         
         # Crear certificado firmado por esta CA
+        ahora = datetime.now(timezone.utc)
+
         cert_usuario = (
             x509.CertificateBuilder()
             .subject_name(subject)
             .issuer_name(self.certificado.subject)
             .public_key(clave_publica_usuario)
             .serial_number(x509.random_serial_number())
-            .not_valid_before(datetime.now())
-            .not_valid_after(datetime.now() + timedelta(days=365))  # 1 año
+            .not_valid_before(ahora)
+            .not_valid_after(ahora + timedelta(days=365))  # 1 año
             .sign(self.clave_privada, hashes.SHA256())
         )
         
