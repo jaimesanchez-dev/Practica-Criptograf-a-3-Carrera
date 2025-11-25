@@ -51,7 +51,7 @@ class GestorCertificadosUsuarios:
             # Cargar cada CA subordinada
             for nombre_ac_sub in carpetas_subordinadas:
                 ac_sub_path = os.path.join(ca_raiz_path, nombre_ac_sub)
-                cert_sub_file = os.path.join(ac_sub_path, f"{nombre_ac_sub}_cert.pem")
+                cert_sub_file = os.path.join(ac_sub_path, "certificado.pem")
                 
                 # Verificar que existe el certificado
                 if os.path.exists(cert_sub_file):

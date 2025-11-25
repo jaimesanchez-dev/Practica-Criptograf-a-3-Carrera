@@ -310,8 +310,8 @@ class AutoridadCertificacion:
             pass
 
 
-    def cargar_certificado(path):
-        """Carga un certificado desde un archivo PEM"""
-        with open(path, "rb") as f:
-            cert_data = f.read()
-        return x509.load_pem_x509_certificate(cert_data)
+def cargar_certificado(path):
+    """Carga un certificado desde un archivo PEM"""
+    with open(path, "rb") as f:
+        cert_data = f.read()
+    return x509.load_pem_x509_certificate(cert_data)
