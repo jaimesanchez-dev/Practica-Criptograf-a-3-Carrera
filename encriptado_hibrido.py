@@ -42,7 +42,7 @@ class CifradoHibrido:
         self.messages_db = load_json(self.messages_file)
         self.keys_db = load_json(self.keys_file)
 
-    def generar_claves(self, usuario):
+    def generar_claves(self, usuario, contraseña=None):
         """Función que genera la clave pública y privada de un usuario"""
         # Cargamos el json de claves
         self.keys_db = load_json(self.keys_file)
@@ -60,7 +60,7 @@ class CifradoHibrido:
         private_pem = private_key.private_bytes(
             encoding=serialization.Encoding.PEM,
             format=serialization.PrivateFormat.PKCS8,
-            encryption_algorithm=serialization.NoEncryption()
+            encryption_algorithm=serialization.BestAvailableEncryption(contraseña.encode())
         ).decode()
 
         public_pem = public_key.public_bytes(
@@ -94,7 +94,7 @@ class CifradoHibrido:
         return public_key
 
 
-    def encriptado_hibrido(self, emisor, receptor, texto):
+    def encriptado_hibrido(self, emisor, receptor, texto, contraseña=None):
         """Función que encripta un mensaje usando cifrado híbrido"""
         # Cargamos los mensajes
         self.messages_db = load_json(self.messages_file)
@@ -136,7 +136,7 @@ class CifradoHibrido:
 
 # Lo nuevo
 
-        clave_privada_emisor = cargar_clave_privada(emisor)
+        clave_privada_emisor = cargar_clave_privada(emisor, contraseña)
         firma = firma_mensaje(clave_privada_emisor, texto_cifrado)
 
         cert_path = f"jsons\\{emisor}\\{emisor}_cert.pem"
@@ -165,7 +165,7 @@ class CifradoHibrido:
         return True
     
 
-    def desencriptado_hibrido(self, usuario):
+    def desencriptado_hibrido(self, usuario, contraseña=None):
         """Desencripta los mensajes usando cifrado híbrido"""
         self.messages_db = load_json(self.messages_file)
 
@@ -177,7 +177,7 @@ class CifradoHibrido:
             return False
 
         # Cargamos la clave privada del usuario
-        private_key = cargar_clave_privada(usuario)
+        private_key = cargar_clave_privada(usuario, contraseña)
 
         print(f"--- Bandeja de entrada de {usuario} ---\n")
         for mensaje in inbox:

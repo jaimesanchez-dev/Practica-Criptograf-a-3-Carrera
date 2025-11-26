@@ -194,7 +194,7 @@ class AutoridadCertificacion:
                 x509.BasicConstraints(ca=True, path_length=None),
                 critical=True,
             )
-            .sign(self.clave_privada, hashes.SHA256()) #Poner aqui el cuerpo del mensaje /(Creo que seria mejor)
+            .sign(self.clave_privada, hashes.SHA256())
         )
         
         # Guardar certificado y claves
@@ -232,7 +232,7 @@ class AutoridadCertificacion:
             .public_key(self.clave_publica)
             .serial_number(x509.random_serial_number())
             .not_valid_before(ahora)
-            .not_valid_after(ahora + timedelta(days=1825))  #5 años
+            .not_valid_after(ahora + timedelta(days=1825))  # 5 años
             .add_extension(
                 x509.BasicConstraints(ca=True, path_length=0),
                 critical=True,

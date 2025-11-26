@@ -28,12 +28,12 @@ def save_clave_publica(usuario, clave_pem):
     print(f"Clave pública guardada en '{path}'")
 
 
-def cargar_clave_privada(usuario):
+def cargar_clave_privada(usuario, contraseña=None):
     """Lee y devuelve la clave privada del usuario desde su archivo .pem"""
 
     path = f"jsons\\{usuario}\\claveprivada.pem"
     with open(path, "rb") as f:
-        private_key = serialization.load_pem_private_key(f.read(), password=None)
+        private_key = serialization.load_pem_private_key(f.read(), password=contraseña.encode())
 
     return private_key
 

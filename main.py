@@ -54,7 +54,7 @@ def main():
 
             if autenticacion.login(usuario, contraseña):
                 print(f"\n¡Bienvenido, {usuario}!")
-                menu_sesion(autenticacion, cripto, gestor_certs, usuario)
+                menu_sesion(autenticacion, cripto, gestor_certs, usuario, contraseña)
             else:
                 print("\nError en el login.\n")
 
@@ -66,7 +66,7 @@ def main():
         else:
             print("Opción no válida. Intenta de nuevo.\n")
 
-def menu_sesion(autenticacion, cripto, gestor_certs, usuario):
+def menu_sesion(autenticacion, cripto, gestor_certs, usuario, contraseña):
     while True:
         menu_usuario(usuario)
         opcion = input("Selecciona una opción: ").strip()
@@ -80,11 +80,11 @@ def menu_sesion(autenticacion, cripto, gestor_certs, usuario):
                 continue
             
             mensaje = input("Mensaje: ").strip()
-            cripto.encriptado_hibrido(usuario, receptor, mensaje)
+            cripto.encriptado_hibrido(usuario, receptor, mensaje, contraseña)
 
         # Leer mensajes
         elif opcion == "2":
-            cripto.desencriptado_hibrido(usuario)
+            cripto.desencriptado_hibrido(usuario, contraseña)
 
         # Ver certificado
         elif opcion == "3":
