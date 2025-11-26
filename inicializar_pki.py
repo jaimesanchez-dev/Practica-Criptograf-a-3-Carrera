@@ -1,5 +1,4 @@
 from certificado import AutoridadCertificacion
-from crear_archivos_autoridades import initialize_folder
 
 def inicializar_pki():
     """Inicializa la infraestructura de clave pública (PKI) con múltiples ACs subordinadas"""

@@ -1,6 +1,5 @@
 from cryptography import x509
 from datetime import datetime
-from cryptography import x509
 from cryptography.x509.oid import NameOID
 from cryptography.hazmat.primitives import hashes, serialization
 from cryptography.hazmat.primitives.asymmetric import rsa
@@ -285,21 +284,6 @@ class AutoridadCertificacion:
             f.write(cert_pem)
         
         print(f"Certificado emitido para usuario '{usuario}'\n")
-        
-        # Guardar en JSON para referencia usando funciones_json
-        certs_db = load_json(self.certs_file)
-        if "usuarios" not in certs_db:
-            certs_db["usuarios"] = {}
-        
-        certs_db["usuarios"][usuario] = {
-            "certificado": cert_pem,
-            "emisor": self.nombre,
-            "fecha_emision": datetime.now().isoformat(),
-            "numero_serie": str(cert_usuario.serial_number),
-            "valido_desde": cert_usuario.not_valid_before_utc.isoformat(),
-            "valido_hasta": cert_usuario.not_valid_after_utc.isoformat(),
-        }
-        save_json(self.certs_file, certs_db)
         
         return cert_usuario
     

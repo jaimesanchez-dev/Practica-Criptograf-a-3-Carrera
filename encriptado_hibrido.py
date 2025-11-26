@@ -16,11 +16,8 @@ from firmas import firma_mensaje, verificar_firma
 from crear_usuarios import cargar_clave_privada
 
 from cryptography import x509
-from cryptography.x509.oid import NameOID
 
 from verificador_cadenas import VerificadorCadena
-import base64
-import os
 
 USERS_FILE = r"jsons\users.json"
 MESSAGES_FILE = r"jsons\messages.json"

@@ -1,7 +1,6 @@
 from certificado import AutoridadCertificacion, cargar_certificado
 from crear_usuarios import cargar_clave_publica
 from verificador_cadenas import VerificadorCadena
-from funciones_json import load_json
 import os
 from cryptography import x509
 import random
