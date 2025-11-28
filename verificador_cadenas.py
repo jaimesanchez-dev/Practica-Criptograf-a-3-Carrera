@@ -113,7 +113,7 @@ class VerificadorCadena:
         print(f"[VERIFICADOR] === Verificando cadena de certificados para '{usuario}' ===\n")
         
         # Cargar certificado del usuario
-        cert_usuario_path = f"jsons\\{usuario}\\certificado.pem"
+        cert_usuario_path = f"jsons\\{usuario}\\{usuario}_cert.pem"
         if not os.path.exists(cert_usuario_path):
             return False, f"No existe certificado para {usuario}\n"
         
