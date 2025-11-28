@@ -17,7 +17,7 @@ def inicializar_pki():
         es_raiz=False,
         ca_superior=ca_raiz
     )
-    ac_a.crear_certificado_subordinado()
+    ca_raiz.crear_certificado_subordinado(ac_a)
     
     # Crear AC Subordinada B
     print("\n[3/4] Creando Autoridad de Certificación Subordinada B...")
@@ -26,7 +26,7 @@ def inicializar_pki():
         es_raiz=False,
         ca_superior=ca_raiz
     )
-    ac_b.crear_certificado_subordinado()
+    ca_raiz.crear_certificado_subordinado(ac_b)
     
     print("\n[4/4] PKI inicializada correctamente")
     print("\nJerarquía creada:")

@@ -204,31 +204,26 @@ class AutoridadCertificacion:
         return self.certificado
         
 
-    def crear_certificado_subordinado(self):
-        """Crea un certificado para una CA subordinada"""
-        if self.es_raiz:
-            raise ValueError("Este método es para CA subordinadas\n")
+    def crear_certificado_subordinado(self, ca_subordinada):
+        """Crea un certificado para una CA subordinada (self es la CA superior)"""
         
-        if not self.ca_superior:
-            raise ValueError("Debe especificarse la CA superior\n")
-        
-        # Generar claves
-        self.generar_claves()
+        # Generar claves para la subordinada
+        ca_subordinada.generar_claves()
         
         # Crear el subject
         subject = x509.Name([
-            x509.NameAttribute(NameOID.COMMON_NAME, self.nombre),
+            x509.NameAttribute(NameOID.COMMON_NAME, ca_subordinada.nombre),
         ])
         
         
-        # Crear certificado firmado por la CA superior
+        # Crear certificado firmado por esta CA (self)
         ahora = datetime.now(timezone.utc)
 
-        self.certificado = (
+        ca_subordinada.certificado = (
             x509.CertificateBuilder()
             .subject_name(subject)
-            .issuer_name(self.ca_superior.certificado.subject)
-            .public_key(self.clave_publica)
+            .issuer_name(self.certificado.subject)
+            .public_key(ca_subordinada.clave_publica)
             .serial_number(x509.random_serial_number())
             .not_valid_before(ahora)
             .not_valid_after(ahora + timedelta(days=1825))  # 5 años
@@ -236,15 +231,15 @@ class AutoridadCertificacion:
                 x509.BasicConstraints(ca=True, path_length=0),
                 critical=True,
             )
-            .sign(self.ca_superior.clave_privada, hashes.SHA256()) #Poner aqui el cuerpo del mensaje /(Creo que seria mejor)
+            .sign(self.clave_privada, hashes.SHA256())
         )
         
         # Guardar certificado y claves
-        self.guardar_certificado()
-        self.guardar_claves()
+        ca_subordinada.guardar_certificado()
+        ca_subordinada.guardar_claves()
         
-        print(f"Certificado subordinado creado para '{self.nombre}'\n")
-        return self.certificado
+        print(f"Certificado subordinado creado para '{ca_subordinada.nombre}' por '{self.nombre}'\n")
+        return ca_subordinada.certificado
 
 
     def emitir_certificado_usuario(self, usuario, clave_publica_usuario):
