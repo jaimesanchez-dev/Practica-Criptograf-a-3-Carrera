@@ -72,11 +72,6 @@ class GestorCertificadosUsuarios:
             print(f"Error al cargar autoridades: {e}\n")
     
 
-    def listar_acs_disponibles(self):
-        """Lista todas las ACs subordinadas disponibles"""
-        return list(self.acs_subordinadas.keys())
-    
-
     def emitir_certificado_a_usuario(self, usuario):
         """Emite un certificado a un usuario desde una AC específica
         Si no se especifica AC, usa la primera disponible"""

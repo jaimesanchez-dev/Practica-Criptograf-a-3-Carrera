@@ -5,15 +5,13 @@ from cryptography.hazmat.primitives import hashes
 from cryptography.fernet import Fernet
 
 from cryptography.hazmat.primitives import hmac
-from cryptography.hazmat.primitives import hashes
 
 from funciones_json import load_json, save_json, initialize_files
-from crear_usuarios import save_clave_privada, save_clave_publica, cargar_clave_privada, cargar_clave_publica
+from crear_usuarios import save_clave_privada, save_clave_publica, cargar_clave_privada
 
 from datetime import datetime
 
 from firmas import firma_mensaje, verificar_firma
-from crear_usuarios import cargar_clave_privada
 
 from cryptography import x509
 

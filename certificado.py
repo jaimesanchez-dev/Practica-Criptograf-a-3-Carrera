@@ -1,13 +1,11 @@
 from cryptography import x509
-from datetime import datetime
 from cryptography.x509.oid import NameOID
 from cryptography.hazmat.primitives import hashes, serialization
 from cryptography.hazmat.primitives.asymmetric import rsa
-from funciones_json import save_json, load_json, initialize_files
+from funciones_json import initialize_files
 import os
 from datetime import datetime, timedelta, timezone
 
-CERTS_FILE = r"jsons\certificates.json"
 
 class AutoridadCertificacion:
     """Clase para gestionar la Autoridad de Certificación"""
@@ -20,7 +18,6 @@ class AutoridadCertificacion:
         self.clave_privada = None
         self.clave_publica = None
         self.certificado = None
-        self.certs_file = CERTS_FILE
         
         self._crear_carpetas()
         
@@ -127,22 +124,6 @@ class AutoridadCertificacion:
 
         with open(path_carpeta, "w", encoding="utf-8") as f:
             f.write(cert_pem)
-        
-        # También guardar en JSON para referencia
-        certs_db = load_json(self.certs_file)
-        if "autoridades" not in certs_db:
-            certs_db["autoridades"] = {}
-        
-        certs_db["autoridades"][self.nombre] = {
-            "tipo": "raiz" if self.es_raiz else "subordinada",
-            "certificado": cert_pem,
-            "fecha_creacion": datetime.now().isoformat(),
-            "numero_serie": str(self.certificado.serial_number),
-            "valido_desde": self.certificado.not_valid_before.isoformat(),
-            "valido_hasta": self.certificado.not_valid_after.isoformat()
-        }
-        save_json(self.certs_file, certs_db)
-
 
     def guardar_claves(self):
         """Guarda las claves privada y pública de la CA"""
