@@ -177,14 +177,14 @@ class CifradoHibrido:
         print(f"--- Bandeja de entrada de {usuario} ---\n")
         for mensaje in inbox:
             try:
-                #Comprobamos el certificado
 
+                #Comprobamos el certificado
                 if "certificado_emisor" not in mensaje:
                     print(f"ERROR: Mensaje sin certificado")
                     continue
         
                 # Verificar certificado
-                verificador = VerificadorCadena() #Verificamos tod la cadena
+                verificador = VerificadorCadena() #Verificamos toda la cadena
                 
                 valido, msg = verificador.verificar_certificado_desde_pem(
                     certificado_pem=mensaje["certificado_emisor"],
@@ -238,14 +238,6 @@ class CifradoHibrido:
                 h = hmac.HMAC(clave_mac, hashes.SHA256())
                 h.update(texto_cifrado)
                 h.verify(mac_recibido)
-                
-                
-
-                # Comprobamos el nombre del certificado, y la cadena de verificacion
-
-                cert_emisor = x509.load_pem_x509_certificate(
-                    mensaje["certificado_emisor"].encode()
-                )
 
                 # Desciframos el mensaje con la clave simétrica
                 fernet = Fernet(clave_simetrica)
