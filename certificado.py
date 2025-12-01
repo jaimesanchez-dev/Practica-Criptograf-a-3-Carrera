@@ -65,28 +65,31 @@ class AutoridadCertificacion:
     def guardar_clave_privada(self, clave_pem):
         """Función que guarda la clave privada"""
 
-        ca_path = self.determinar_raiz() + "\\claveprivada.pem"
+        ca_path = self.determinar_raiz()
+        priv_path = os.path.join(ca_path, "claveprivada.pem")
         
-        with open(ca_path, "w", encoding="utf-8") as f:
+        with open(priv_path, "w", encoding="utf-8") as f:
             f.write(clave_pem)
-        print(f"Clave privada guardada en '{ca_path}'\n")
+        print(f"Clave privada guardada en '{priv_path}'\n")
 
 
     def guardar_clave_pública(self, clave_pem):
         """Función que guarda la clave pública"""
 
-        ca_path = self.determinar_raiz() + "\\clavepublica.pem"
+        ca_path = self.determinar_raiz()
+        public_path = os.path.join(ca_path, "clavepublica.pem")
         
-        with open(ca_path, "w", encoding="utf-8") as f:
+        with open(public_path, "w", encoding="utf-8") as f:
             f.write(clave_pem)
-        print(f"Clave pública guardada en '{ca_path}'\n")
+        print(f"Clave pública guardada en '{public_path}'\n")
     
 
     def cargar_clave_privada(self):
         """Lee y devuelve la clave privada del autoridad desde su archivo .pem"""
 
-        ca_path = self.determinar_raiz() + "\\claveprivada.pem"
-        with open(ca_path, "rb") as f:
+        ca_path = self.determinar_raiz()
+        priv_path = os.path.join(ca_path, "claveprivada.pem")
+        with open(priv_path, "rb") as f:
             private_key = serialization.load_pem_private_key(f.read(), password=None)
 
         return private_key
@@ -95,8 +98,9 @@ class AutoridadCertificacion:
     def cargar_clave_publica(self):
         """Lee y devuelve la clave pública del autoridad desde su archivo .pem"""
 
-        ca_path = self.determinar_raiz() + "\\clavepublica.pem"
-        with open(ca_path, "rb") as f:
+        ca_path = self.determinar_raiz()
+        public_path = os.path.join(ca_path, "clavepublica.pem")
+        with open(public_path, "rb") as f:
             public_key = serialization.load_pem_public_key(f.read())
 
         return public_key

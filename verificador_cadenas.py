@@ -110,7 +110,7 @@ class VerificadorCadena:
         if not self.ca_raiz_cert:
             return False, "CA Raíz no disponible\n"
         
-        print(f"[VERIFICADOR] === Verificando cadena de certificados para '{usuario}' ===\n")
+        print(f"Verificando cadena de certificados para '{usuario}'\n")
         
         # Cargar certificado del usuario
         cert_usuario_path = f"jsons\\{usuario}\\{usuario}_cert.pem"
@@ -138,29 +138,23 @@ class VerificadorCadena:
             if nombre_real != nombre_esperado:
                 return False, f"Certificado no corresponde a '{nombre_esperado}'\n"
             
-            return self._verificar_cert(cert_usuario, nombre_esperado, False)
+            return self._verificar_cert(cert_usuario, nombre_esperado)
             
         except Exception as e:
             return False, f"Error al procesar certificado: {e}\n"
     
 
-    def _verificar_cert(self, cert_usuario, nombre_usuario, detallado):
+    def _verificar_cert(self, cert_usuario, nombre_usuario):
         """Verifica un certificado"""
         
         # Verificar fechas del usuario
         if not self.verificar_fechas(cert_usuario):
             return False, "Certificado de usuario expirado\n"
         
-        if detallado:
-            print(f"      Fechas válidas")
-        
         # Identificar AC emisora
         nombre_ac_emisora = self.obtener_nombre_ac_emisora(cert_usuario)
         if not nombre_ac_emisora:
             return False, "No se pudo identificar CA emisora\n"
-        
-        if detallado:
-            print(f"Certificado emitido por: '{nombre_ac_emisora}'\n")
         
         cert_ac_subordinada = self.cargar_certificado_ac(nombre_ac_emisora)
         if not cert_ac_subordinada:
@@ -168,41 +162,21 @@ class VerificadorCadena:
         
         # Verificar firma de AC sobre certificado de usuario
         if not self.verificar_firma_certificado(cert_usuario, cert_ac_subordinada):
-            return False, f"Certificado NO firmado por {nombre_ac_emisora}\n"
-        
-        if detallado:
-            print(f"      Firma del certificado de usuario verificada correctamente\n")
+            return False, f"Certificado no firmado por {nombre_ac_emisora}\n"
         
         # Verificar fechas de AC
         if not self.verificar_fechas(cert_ac_subordinada):
             return False, f"Certificado de {nombre_ac_emisora} expirado\n"
         
-        if detallado:
-            print(f"      Fechas válidas\n")   
-        
-        # Verificar firma de CA Raíz sobre AC
-        if detallado:
-            print(f"Verificando firma de {self.nombre_ca_raiz} sobre '{nombre_ac_emisora}'\n")
-        
         if not self.verificar_firma_certificado(cert_ac_subordinada, self.ca_raiz_cert):
             return False, f"{nombre_ac_emisora} no firmada por {self.nombre_ca_raiz}\n"
-        
-        if detallado:
-            print(f"      Firma del certificado de AC subordinada verificada correctamente\n")
         
         # Verificar autofirma de CA Raíz
         if not self.verificar_firma_certificado(self.ca_raiz_cert, self.ca_raiz_cert):
             return False, f"{self.nombre_ca_raiz} no está autofirmada correctamente\n"
         
-        if detallado:
-            print(f"      {self.nombre_ca_raiz} autofirmada correctamente\n")
-        
         # Verificar fechas de CA Raíz
         if not self.verificar_fechas(self.ca_raiz_cert):
             return False, f"Certificado de {self.nombre_ca_raiz} expirado\n"
-        
-        if detallado:
-            print(f"Cadena de certificados válida\n")
-            print(f"            {nombre_usuario} <- {nombre_ac_emisora} <- {self.nombre_ca_raiz}\n")
         
         return True, f"Cadena válida: {nombre_usuario} <- {nombre_ac_emisora} <- {self.nombre_ca_raiz}\n"

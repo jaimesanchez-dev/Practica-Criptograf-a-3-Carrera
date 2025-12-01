@@ -1,6 +1,7 @@
 from autenticacion import SistemaAutenticacion
 from encriptado_hibrido import CifradoHibrido
 from gestor_certificados_usuarios import GestorCertificadosUsuarios
+from inicializar_pki import inicializar_pki
 import getpass
 import os
 
@@ -22,9 +23,7 @@ def menu_usuario(username):
 def main():
     # Verificar que existe la PKI
     if not os.path.exists("jsons\\certificados"):
-        print("[ADVERTENCIA] No se encontró la PKI.")
-        print("Ejecute primero: python inicializar_pki.py\n")
-        return
+        inicializar_pki()
     
     autenticacion = SistemaAutenticacion()
     cripto = CifradoHibrido()
@@ -40,7 +39,7 @@ def main():
             contraseña = getpass.getpass("Contraseña: ").strip()
 
             if autenticacion.registrar_usuario(usuario, contraseña):
-                print(f"\n[PKI] Emitiendo certificado para '{usuario}'...")
+                print(f"\nEmitiendo certificado para '{usuario}'...")
                 gestor_certs.emitir_certificado_a_usuario(usuario)
                 print("\nUsuario registrado correctamente con certificado.\n")
             else:

@@ -33,6 +33,7 @@ def verificar_firma(clave_publica, mensaje, firma):
             hashes.SHA256()
         )
         return True
+    
     except Exception as e:
-        print(f"[FIRMA] Verificación fallida: {e}")
+        print(f"Verificación fallida: {e}")
         return False
