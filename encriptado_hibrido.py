@@ -239,6 +239,11 @@ class CifradoHibrido:
                 h.update(texto_cifrado)
                 h.verify(mac_recibido)
 
+                # Comprobamos el nombre del certificado, y la cadena de verificacion
+                cert_emisor = x509.load_pem_x509_certificate(
+                    mensaje["certificado_emisor"].encode()
+                )
+
                 # Desciframos el mensaje con la clave simétrica
                 fernet = Fernet(clave_simetrica)
                 texto_plano = fernet.decrypt(texto_cifrado).decode()

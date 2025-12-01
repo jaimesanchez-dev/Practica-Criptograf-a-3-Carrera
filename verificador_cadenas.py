@@ -120,7 +120,7 @@ class VerificadorCadena:
         cert_usuario = cargar_certificado(cert_usuario_path)
         print(f"Certificado de usuario '{usuario}' cargado\n")
         
-        return self._verificar_cert(cert_usuario, usuario, True)
+        return self._verificar_cert(cert_usuario, usuario)
     
 
     def verificar_certificado_desde_pem(self, certificado_pem, nombre_esperado):
