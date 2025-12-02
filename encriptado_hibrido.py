@@ -195,11 +195,22 @@ class CifradoHibrido:
                     print(f"ERROR: {msg}")
                     continue
 
-                 # Extraer clave pública del certificado
+                # Extraer clave pública del certificado
                 cert_emisor = x509.load_pem_x509_certificate(
                     mensaje["certificado_emisor"].encode()
                 )
-                clave_publica_emisor = cert_emisor.public_key()
+                clave_publica_emisor = cert_emisor.public_key() 
+
+                #Comprobamos si la firma es correcta
+                texto_cifrado = mensaje["texto_cifrado"].encode()
+
+                if "firma" in mensaje:
+                    firma = bytes.fromhex(mensaje["firma"])
+                    
+                    if verificar_firma(clave_publica_emisor, texto_cifrado, firma):
+                        print(f" Firma digital verificada correctamente")
+                    else:
+                        print(f" Firma digital NO válida")
 
                 # Desciframos la clave simétrica con la clave privada
                 clave_cifrada_bytes = bytes.fromhex(mensaje["clave_cifrada"])
@@ -219,18 +230,7 @@ class CifradoHibrido:
                     algorithm=hashes.SHA256(),
                     label=None
                     )
-                )   
-
-                #Comprobamos si la firma es correcta
-                texto_cifrado = mensaje["texto_cifrado"].encode()
-
-                if "firma" in mensaje:
-                    firma = bytes.fromhex(mensaje["firma"])
-                    
-                    if verificar_firma(clave_publica_emisor, texto_cifrado, firma):
-                        print(f" Firma digital verificada correctamente")
-                    else:
-                        print(f" Firma digital NO válida")
+                )  
 
                 #Comprobamos si el mac es valido
                 mac_recibido = bytes.fromhex(mensaje["mac"])
@@ -238,11 +238,6 @@ class CifradoHibrido:
                 h = hmac.HMAC(clave_mac, hashes.SHA256())
                 h.update(texto_cifrado)
                 h.verify(mac_recibido)
-
-                # Comprobamos el nombre del certificado, y la cadena de verificacion
-                cert_emisor = x509.load_pem_x509_certificate(
-                    mensaje["certificado_emisor"].encode()
-                )
 
                 # Desciframos el mensaje con la clave simétrica
                 fernet = Fernet(clave_simetrica)
